@@ -22,4 +22,4 @@ class Move():
         return;
 
     def __str__(self):
-        return self.word + " (" + str(self.value) + ")";
+        return self.word + " (" + str(self.value) + ")" + " [" + str(self.pos[0]) + ", " + str(self.pos[1]) + "]" + " - dir: " + self.dir;

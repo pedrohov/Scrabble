@@ -69,13 +69,22 @@ class Board():
         """ Checa se uma nova pedra colocada no tabuleiro
             gera palavras cruzadas validas.
         """
+
+        # Se a palavra nao existir no dicionario
+        # ou possuir menos do que dois caracteres
+        # a jogada eh invalida:
+        if((self.dict.lookup(move.word) is False) or (len(move.word) < 2)):
+            return False;
+
         lin = move.pos[0];
         col = move.pos[1];
+        utilizaAncora = False;
 
         for l in move.word:
 
             _lin = lin;
             _col = col;
+            crossWord = "";
 
             # Nao checa palavras ja existentes (ancora):
             if(self.matrix[lin][col].isEmpty()):
@@ -93,7 +102,6 @@ class Board():
                         pedra = self.get(_lin, _col);
 
                     # Forma a palavra:
-                    crossWord = "";
                     _lin += 1;
                     pedra = self.get(_lin, _col);
                     while(pedra != ' '):
@@ -113,7 +121,6 @@ class Board():
                         pedra = self.get(_lin, _col);
 
                     # Forma a palavra:
-                    crossWord = "";
                     _col += 1;
                     pedra = self.get(_lin, _col);
                     while(pedra != ' '):
@@ -131,6 +138,14 @@ class Board():
                     continue;
                 if(self.dict.lookup(crossWord) is False):
                     return False;
+
+            # Utilizou uma posicao do tabuleiro.
+            elif(self.get(lin, col) == l):
+                utilizaAncora = True; 
+
+             # Tentou substituir uma letra do tabuleiro.
+            else:
+                return False;
 
             # Determina proxima posicao:
             if(move.dir == 'H'):
@@ -240,6 +255,7 @@ class Board():
             _col = col;
             _pts = 0;
             _multWord = 1;
+            crossWord = "";
 
             # Nao checa palavras ja existentes (ancora):
             if(self.matrix[lin][col].isEmpty()):
@@ -257,7 +273,6 @@ class Board():
                         pedra = self.get(_lin, _col);
 
                     # Forma a palavra:
-                    crossWord = "";
                     _lin += 1;
                     pedra = self.get(_lin, _col);
                     while(pedra != ' '):
@@ -291,7 +306,6 @@ class Board():
                         pedra = self.get(_lin, _col);
 
                     # Forma a palavra:
-                    crossWord = "";
                     _col += 1;
                     pedra = self.get(_lin, _col);
                     while(pedra != ' '):

@@ -18,14 +18,21 @@ class Player():
         self.board    = board;
         self.dict     = dictionary;
 
-    def play(self):
+    def play(self, primeira=False):
         move = None;
 
         while(move is None):
             comando = input("\nInforme a jogada como 'Y X d <palavra>' (Y=linha, X=coluna, D=H/V)\n> ");
-            move = self.parseMove(comando);
+            move = self.parseMove(comando, primeira);
 
-    def parseMove(self, entrada):
+        # Faz a jogada se for valida:
+        if(move is not None):
+            print("Jogada: ", end='')
+            print(move)
+            self.board.insertWord(move, self);
+            self.addWord(move);
+
+    def parseMove(self, entrada, primeira=False):
         """ Recebe uma linha do terminal, 
             cria uma nova Move() e a valida.
             Insere a jogada no tabuleiro se for valida.
@@ -69,50 +76,94 @@ class Player():
             print("Coluna invalida.");
             return None;
 
+        # Determina a direcao:
         direc = comando[2];
         if(direc.upper() != 'V') and (direc.upper() != 'H'):
             print("Direcao invalida.");
             return None;
 
+        # Determina a palavra:
         palavra = comando[3];
-        brancos = self.findBlankPieces(palavra);
+        brancos = self.findBlankPieces(palavra, (lin, col), direc.upper(), primeira);
 
+        # Palavra possui pedras que o jogador nao tem:
         if(brancos is None):
-            print("Nao existem pedras suficientes para formar <" + palavra + ">.");
+            #print("Nao existem pedras suficientes para formar <" + palavra + ">.");
             return None;
 
-        print(comando);
-        jogada = Move(palavra, (lin, col), direc);
+        # Cria uma nova jogada com os dados recebidos:
+        jogada = Move(palavra, (lin, col), direc.upper());
         jogada.brancos = brancos;
+
+        # Verifica se a jogada eh valida:
+        if(self.board.isValid(jogada, self) == False):
+            print("Jogada invalida.");
+            return None;
+
+        # Verifica se a jogada utiliza uma palavra no tabuleiro:
+
+
+        # Determina a pontuacao da jogada:
+        jogada.value = self.board.calcMovePoints(jogada);
+
+        # print(comando);
 
         return jogada;
 
-    def findBlankPieces(self, word):
+    def findBlankPieces(self, word, pos, direc, primeira=False):
         """ Verifica se o jogador usou pecas em branco
             para formar a palavra.
         """
+        lin = pos[0];
+        col = pos[1];
+        index = 0;
         brancos = {};
         mao = deepcopy(self.hand);
-        index = 0;
-        for l in word:
-            # Retira peca da mao:
-            if((l in mao) and (mao[l].quantity > 0)):
-                mao[l].quantity -= 1;
-            # Retira branco da mao:
-            elif(('#' in mao) and (mao['#'].quantity > 0)):
-                mao['#'].quantity -= 1;
-                brancos[index] = l;
+        ancora = False;
 
-            # Jogador nao tem pedras suficientes pra formar a palavra:
+        for l in word:
+            if(self.board.matrix[lin][col].isEmpty()):
+
+                # Retira peca da mao:
+                if((l in mao) and (mao[l].quantity > 0)):
+                    mao[l].quantity -= 1;
+
+                # Retira branco da mao:
+                elif(('#' in mao) and (mao['#'].quantity > 0)):
+                    mao['#'].quantity -= 1;
+                    brancos[index] = l;
+
+                # Jogador nao tem pedras suficientes pra formar a palavra:
+                else:
+                    print("Nao existem pedras suficientes para formar <" + word + ">.");
+                    return None;
+
+            # Jogador tentou substituir pedra do tabuleiro.
+            elif(self.board.get(lin, col) != l):
+                print("Nao e possivel substituir palavras do tabuleiro.");
+                return None; 
+
+            # Jogador utilizou uma ancora:
             else:
-                return None;
+                ancora = True;
+
+            # Posicao para a proxima peca:
+            if(direc == "H"):
+                col += 1;
+            elif(direc == "V"):
+                lin += 1;
 
             index += 1;
+
+        # Se o jogador nao utilizou uma ancora:
+        if(ancora == False) and (primeira == False):
+            print("E preciso utilizar ao menos uma pedra do tabuleiro.");
+            return None;
 
         return brancos;
 
     def firstPlay(self):
-        self.play();
+        self.play(True);
 
     def addWord(self, move):
         self.points += move.value;

@@ -3,12 +3,12 @@
 # Pedro Henrique Oliveira Veloso (0002346)
 # Saulo Ricardo Dias Fernandes   (0021581)
 
-from player import Player;
+from player import *;
 
 class PlayerIA(Player):
 
     def __init__(self, name, board, dictionary):
-        super().__init__(name);
+        super().__init__(name,  board, dictionary);
         self.anchors  = [];
         self.anchor   = None;
         self.bestMove = None;
@@ -225,8 +225,6 @@ class PlayerIA(Player):
         # a jogada gerada eh invalida:
         if(self.placedNew == False):
             return;
-
-        #print("> PALAVRA: " + word + " [ " + str(len(self.brancos)) + " ]");
 
         if(self.playDir == "H"):
             iniY = square.pos[1] - len(word);
