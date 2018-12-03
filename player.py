@@ -10,19 +10,29 @@ from move   import *;
 class Player():
 
     def __init__(self, name, board, dictionary):
-        self.name   = name;
-        self.hand   = {};
-        self.words  = [];
-        self.points = 0;
+        self.name   = name; # Nome do jogador.
+        self.hand   = {};   # Pecas na mao do jogador.
+        self.words  = [];   # Palavras formadas pelo jogador.
+        self.points = 0;    # Pontuacao do jogador.
+        self.nPass  = 0;    # Quantidade de vezes que o jogador passou de turno.
 
-        self.board    = board;
-        self.dict     = dictionary;
+        self.board  = board;      # Referencia para a mesa.
+        self.dict   = dictionary; # Referencia para o dicionario.
 
     def play(self, primeira=False):
         move = None;
 
         while(move is None):
             comando = input("\nInforme a jogada como 'Y X d <palavra>' (Y=linha, X=coluna, D=H/V)\n> ");
+            
+            # Passou o turno:
+            if(comando == 'pass'):
+                self.nPass += 1;
+                return self.piecesToChange();
+            # Sai do jogo:
+            elif(comando == 'quit'):
+                exit();
+
             move = self.parseMove(comando, primeira);
 
         # Faz a jogada se for valida:
@@ -31,6 +41,9 @@ class Player():
             print(move)
             self.board.insertWord(move, self);
             self.addWord(move);
+            self.nPass = 0;
+        
+        return {};
 
     def parseMove(self, entrada, primeira=False):
         """ Recebe uma linha do terminal, 
@@ -168,6 +181,50 @@ class Player():
     def addWord(self, move):
         self.points += move.value;
         self.words.append(move);
+
+    def piecesToChange(self):
+        """ Forma um dicionario de pecas para serem trocadas.
+            Troca apenas letras que nao sao vogais.
+        """
+        self.showHand();
+        troca  = {};
+
+        while(True):
+            comando = input("\nInforme as pecas que deseja trocar (separadas por espaco).\n> ");
+            pieces = comando.split(' ');
+
+            # Passou o turno:
+            if(pieces[0] == 'pass'):
+                return {};
+
+            # Checa se todas as pecas estao na mao do jogador:
+            erro = False;
+            for l in pieces:
+                # Trata apenas pecas em lowercase:
+                l = l.lower();
+                if(l not in self.hand) or (self.hand[l].quantity == 0):
+                    print("Voce nao possui a peca " + l.upper() + ".");
+                    erro = True;
+                    break;
+
+            # Remove as pecas e forma o conjunto a ser trocado:
+            if(not erro):
+                for l in pieces:
+                    # Trata apenas pecas em lowercase:
+                    l = l.lower();
+
+                    # Se nao existir no dicionario, cria uma chave nova:
+                    if(l not in troca):
+                        troca[l] = 1;
+                    # Ou incrementa a quantidade existente:
+                    else:
+                        troca[l] += 1;
+
+                    # Remove a peca da mao do jogador:
+                    self.hand[l].quantity -= 1;
+
+                return troca;
+        return {};
 
     def showHand(self):
         res = "";

@@ -9,13 +9,12 @@ class PlayerIA(Player):
 
     def __init__(self, name, board, dictionary):
         super().__init__(name,  board, dictionary);
-        self.anchors  = [];
-        self.anchor   = None;
-        self.bestMove = None;
-        self.playDir  = None;
-        self.placedNew = False;
-        self.placedRight = 0;
-        self.pos = (0, 0);
+        self.anchors  = [];      # Lista de ancoras para formar palavras.
+        self.anchor   = None;    # Ancora atual.
+        self.bestMove = None;    # Jogada com maior pontuacao.
+        self.playDir  = None;    # Direcao da jogada (H/V).
+        self.placedNew = False;  # Informa se uma nova peca foi inserida na palavra.
+        self.placedRight = 0;    # Informa a quantidade de pecas colocadas apos o ponto ancora.
 
         # Lista de tuplas que informa se foram utilizadas pedras
         # em branco para formar a jogada e a posicao da pedra.
@@ -32,9 +31,11 @@ class PlayerIA(Player):
         self.getAnchors();
 
         for anchor in self.anchors:
+            # print(anchor[0], end=' ')
+            # print(anchor[1])
+
             # Define ancora atual:
             self.anchor = (anchor[1].value, anchor[1]);
-            self.pos = self.anchor[1].pos;
 
             # Direcao da jogada:
             self.playDir = anchor[0];
@@ -44,12 +45,16 @@ class PlayerIA(Player):
 
         # Faz a melhor jogada encontrada:
         if(self.bestMove is None):
-            print("Nao tenho jogada nenhum smaliefaec.");
-            exit();
+            # print("Nao tenho jogada nenhum smaliefaec.");
+            # exit();
+            self.nPass += 1;
+            return self.piecesToChange();
         else:
-            self.board.insertWord(self.bestMove, self);
-            self.addWord(self.bestMove);
+            self.board.insertWord(self.bestMove, self); # Adiciona a jogada na mesa.
+            self.addWord(self.bestMove); # Adiciona a palavra a lista de palavras formadas.
             print(self.bestMove);
+            self.nPass = 0; # Reseta a contagem de turnos passados.
+            return {};
 
 
     def leftPart(self, word, root, limit, square):
@@ -256,13 +261,54 @@ class PlayerIA(Player):
                 if((lin >= 1) and (lin < 15)):
                     # Se a posicao acima estiver vazia, marca esta como ancora:
                     if((self.board.matrix[lin - 1][col].isEmpty()) and (self.board.matrix[lin][col].isEmpty() == False)):
-                        self.anchors.append(("V", self.board.matrix[lin][col]));
+
+                        # Enquanto houver pedras acima do ponto ancora, passe a ancora para cima:
+                        i = 2;
+                        square = self.board.matrix[lin - i][col];
+                        while(square.isEmpty() == False):
+                            i += 1;
+                            square = self.board.matrix[lin - i][col];
+
+                        self.anchors.append(("V", self.board.matrix[lin - i + 2][col]));
 
                 # Se a coluna for valida:
                 if((col >= 1) and (col < 15)):
                     # Se a posicao a esquerda estiver vazia, marca esta como ancora:
                     if((self.board.matrix[lin][col - 1].isEmpty()) and (self.board.matrix[lin][col].isEmpty() == False)):
-                        self.anchors.append(("H", self.board.matrix[lin][col]));
+
+                        # Enquanto houver pedras acima do ponto ancora, passe a ancora para cima:
+                        i = 2;
+                        square = self.board.matrix[lin][col - i];
+                        while(square.isEmpty() == False):
+                            i += 1;
+                            square = self.board.matrix[lin][col - i];
+
+                        self.anchors.append(("H", self.board.matrix[lin][col - i + 2]));
+                        #self.anchors.append(("H", self.board.matrix[lin][col]));
+
+    def piecesToChange(self):
+        """ Forma um dicionario de pecas para serem trocadas.
+            Troca apenas letras que nao sao vogais.
+        """
+        vogais = ['a', 'e', 'i', 'o', 'u', '#'];
+        troca  = {};
+        for l, piece in self.hand.items():
+            # Se a peca nao for uma vogal marca para ser trocada:
+            if(l not in vogais) and (self.hand[l].quantity > 0):
+                # Se nao existir no dicionario, cria uma chave nova:
+                if(l not in troca):
+                    troca[l] = 1;
+                # Ou incrementa a quantidade existente:
+                else:
+                    troca[l] += 1;
+
+                # Remove a peca da mao do jogador:
+                self.hand[l].quantity -= 1;
+
+        print("#TROCA: ");
+        print(troca)
+
+        return troca;
 
     def isValid(self):
         return True;

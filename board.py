@@ -281,7 +281,10 @@ class Board():
 
                         # Adiciona pontuacao:
                         _pt = Piece.getLetterData(Piece, pedra)[0];
-                        square = self.matrix[_lin][_col];
+                        square = self.getSquare(_lin, _col);
+                        if(square is None):
+                            break;
+                            
                         if((square.multiplier == "$") or (square.multiplier == "*")):
                             _multWord = _multWord * 2;
                             _pts = _pts + _pt;
@@ -314,7 +317,10 @@ class Board():
 
                         # Adiciona pontuacao:
                         _pt = Piece.getLetterData(Piece, pedra)[0];
-                        square = self.matrix[_lin][_col];
+                        square = self.getSquare(_lin, _col);
+                        if(square is None):
+                            break;
+
                         if((square.multiplier == "$") or (square.multiplier == "*")):
                             _multWord = _multWord * 2;
                             _pts = _pts + _pt;
@@ -400,6 +406,11 @@ class Board():
         if((lin < 0) or (lin > 14) or (col < 0) or (col > 14)):
             return ' ';
         return self.matrix[lin][col].value;
+
+    def getSquare(self, lin, col):
+        if((lin < 0) or (lin > 14) or (col < 0) or (col > 14)):
+            return None;
+        return self.matrix[lin][col];
 
     def __str__(self):
         # Exibe index da coluna:

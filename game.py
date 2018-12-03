@@ -37,6 +37,11 @@ class Game():
         # Mostra o jogo:
         self.showBoard();
 
+        # self.turn.showHand();
+        # troca = self.turn.piecesToChange();
+        # self.changePieces(troca, self.turn);
+        # self.turn.showHand();
+
         # Faz a primeira jogada:
         self.turn.firstPlay();
 
@@ -50,8 +55,10 @@ class Game():
         """ Loop de jogo """
         while(True):
             self.showBoard();
-            self.turn.play();
+            pecasTrocar = self.turn.play();
+            self.changePieces(pecasTrocar, self.turn);
             self.changeTurn();
+            self.isGameOver();
 
     def startingHand(self):
         """ Sorteia uma mao inicial e a retorna como dicionario de Pieces."""
@@ -59,8 +66,8 @@ class Game():
         i = 0;
         while(i < 7):
             # Sorteia uma peca aleatoria:
-            (piece, value) = random.choice(list(self.pieces.items()));
-            if(value > 0):
+            (piece, qtd) = random.choice(list(self.pieces.items()));
+            if(qtd > 0):
                 # Remove a peca do saquinho:
                 self.pieces[piece] -= 1;
                 i += 1;
@@ -72,6 +79,48 @@ class Game():
                     res[piece] = Piece(piece);
 
         return res;
+
+    def changePieces(self, pieces, player):
+        """ Troca as pecas selecionadas pelo jogador.
+            No final da troca passa o turno.
+            Se nao for informada nenhuma peca, apenas passa o turno.
+        """
+
+        # Checa se existem pecas suficiente para fazer a troca:
+        qtdPedida = 0;
+        qtdSaquinho = 0;
+        for piece, quantity in self.pieces.items():
+            if quantity > 0:
+                qtdSaquinho += 1;
+
+        for piece, quantity in pieces.items():
+            if quantity > 0:
+                qtdPedida += 1;
+
+        # Foram pedidas mais pecas do que existe no saquinho:
+        if(qtdPedida > qtdSaquinho):
+            print("Nao existem pecas suficientes para fazer a troca.");
+            return;
+
+        for piece, quantity in pieces.items():
+            # Sorteia uma nova peca aleatoria:
+            (new, qtd) = random.choice(list(self.pieces.items()));
+
+            # Garante que foi sorteada uma peca que esta no saquinho:
+            while(qtd == 0):
+                (new, qtd) = random.choice(list(self.pieces.items()));
+
+            # Adiciona a nova peca a mao do jogador:
+            if(new not in player.hand):
+                player.hand[new] = Piece(new);
+            else:
+                player.hand[new].quantity += 1;
+
+            # Adiciona a peca antiga ao saquinho do jogo:
+            self.pieces[piece] += 1;
+
+        return;
+
 
     def showBoard(self):
         print(self.board);
@@ -107,6 +156,11 @@ class Game():
             self.turn = self.player1;
         else:
             self.turn = self.player2;
+
+    def isGameOver(self):
+        if(self.player1.nPass >= 2) and (self.player2.nPass >= 2):
+            print("Fim do jogo.");
+            exit();
 
 
 if __name__ == "__main__":
