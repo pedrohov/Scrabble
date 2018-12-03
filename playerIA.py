@@ -21,11 +21,15 @@ class PlayerIA(Player):
         # Utilizado para calcular o valor da jogada pelo tabuleiro.
         self.brancos = [];
 
-    def play(self):
+    def play(self, primeira=False):
         """ Determina e realiza a melhor jogada 
             encontrada, tomando 'self.anchors' como
             pontos ancora.
         """
+
+        # Se for a primeira jogada, faca firstPlay:
+        if(primeira):
+            return self.firstPlay();
 
         # Determina todos os pontos ancora:
         self.getAnchors();
@@ -45,16 +49,13 @@ class PlayerIA(Player):
 
         # Faz a melhor jogada encontrada:
         if(self.bestMove is None):
-            # print("Nao tenho jogada nenhum smaliefaec.");
-            # exit();
             self.nPass += 1;
-            return self.piecesToChange();
+            return (self.piecesToChange(), None);
         else:
             self.board.insertWord(self.bestMove, self); # Adiciona a jogada na mesa.
             self.addWord(self.bestMove); # Adiciona a palavra a lista de palavras formadas.
-            print(self.bestMove);
             self.nPass = 0; # Reseta a contagem de turnos passados.
-            return {};
+            return ({}, self.bestMove);
 
 
     def leftPart(self, word, root, limit, square):
@@ -214,12 +215,13 @@ class PlayerIA(Player):
 
         # Faz a melhor jogada encontrada:
         if(self.bestMove is None):
-            print("Nao tenho jogada nenhuma smaliefaec.");
-            exit();
+            self.nPass += 1;
+            return (self.piecesToChange(), None);
         else:
-            self.board.insertWord(self.bestMove, self);
-            self.addWord(self.bestMove);
-            print(self.bestMove);
+            self.board.insertWord(self.bestMove, self); # Adiciona a jogada na mesa.
+            self.addWord(self.bestMove); # Adiciona a palavra a lista de palavras formadas.
+            self.nPass = 0; # Reseta a contagem de turnos passados.
+            return ({}, self.bestMove);
 
     def generateMove(self, word, square):
         """ Cria uma jogada.
@@ -305,8 +307,8 @@ class PlayerIA(Player):
                 # Remove a peca da mao do jogador:
                 self.hand[l].quantity -= 1;
 
-        print("#TROCA: ");
-        print(troca)
+        # print("#TROCA: ");
+        # print(troca)
 
         return troca;
 

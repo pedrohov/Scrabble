@@ -10,6 +10,9 @@ from dawg   import *;
 from board  import *;
 from playerIA import *;
 
+import cProfile;
+import re;
+
 class Game():
 
     def __init__(self, boardFile, dawgFile):
@@ -23,41 +26,50 @@ class Game():
                        'v': 2, 'j': 2 , 'q': 1 , 'x': 1 , 'z': 1 };
 
         self.player1 = None;
-        self.player2 = None;        
+        self.player2 = None;
 
     def start(self):
 
         # Definir jogador Humano/Computador:
         opcao = 0;
         while(opcao < 1) or (opcao > 3):
-            opcao = int(input("\nSCRABBLE\n1 - Jogador vs Jogador.\n2 - Jogador vs Com\n3 - Com vs Com\n\nOpcao: "));
+            try:
+                opcao = int(input("\nSCRABBLE\n1 - Jogador vs Jogador.\n2 - Jogador vs Com\n3 - Com vs Com\n\nOpcao: "));
+            except ValueError:
+                opcao = 0;
+
         print("");
         self.setupPlayers(opcao);
-
-        # Mostra o jogo:
-        self.showBoard();
-
-        # self.turn.showHand();
-        # troca = self.turn.piecesToChange();
-        # self.changePieces(troca, self.turn);
-        # self.turn.showHand();
-
-        # Faz a primeira jogada:
-        self.turn.firstPlay();
-
-        # Troca o turno atual:
-        self.changeTurn();
 
         # Loop de jogadas:
         self.run();
 
     def run(self):
         """ Loop de jogo """
+        firstPlay = True;
+
         while(True):
+            # Mostra o estado atual do jogo:
             self.showBoard();
-            pecasTrocar = self.turn.play();
+
+            # Faz a jogada do jogador atual:
+            (pecasTrocar, jogada) = self.turn.play(firstPlay);
+
+            # Mostra a jogada feita:
+            self.showMove(jogada);
+
+            # Determina se nao e mais a primeira jogada:
+            if(jogada is not None) and (firstPlay):
+                firstPlay = False;
+
+            # Se o jogador passar o turno
+            # troca as pecas da mao que ele pedir para trocar:
             self.changePieces(pecasTrocar, self.turn);
+
+            # Passa o turno do jogador atual:
             self.changeTurn();
+
+            # Checa se o jogo chegou ao fim (ambos os jogadores passaram 2x):
             self.isGameOver();
 
     def startingHand(self):
@@ -123,8 +135,9 @@ class Game():
 
 
     def showBoard(self):
-        print(self.board);
-        self.turn.showHand();
+        #print(self.board);
+        self.board.show(self.player1, self.player2);
+        print(self.player1.__str__() + "\t" + self.turn.showHand() + "\t" + self.player2.__str__());
 
     def changeTurn(self):
         """ Troca o turno do jogador atual.
@@ -156,6 +169,12 @@ class Game():
             self.turn = self.player1;
         else:
             self.turn = self.player2;
+
+    def showMove(self, move):
+        if(move is not None):
+            print("\n# O jogador " + self.turn.name + " colocou " + move.word + " por " + str(move.value) + " pontos.\n");
+        else:
+            print("\n# O jogador " + self.turn.name + " passou o turno.\n");
 
     def isGameOver(self):
         if(self.player1.nPass >= 2) and (self.player2.nPass >= 2):

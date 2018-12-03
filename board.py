@@ -160,7 +160,7 @@ class Board():
         lin = move.pos[0];
         col = move.pos[1];
 
-        player.showHand();
+        #print(player.showHand());
 
         index = 0;
         for l in move.word:
@@ -284,7 +284,7 @@ class Board():
                         square = self.getSquare(_lin, _col);
                         if(square is None):
                             break;
-                            
+
                         if((square.multiplier == "$") or (square.multiplier == "*")):
                             _multWord = _multWord * 2;
                             _pts = _pts + _pt;
@@ -448,6 +448,92 @@ class Board():
         board = board + "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
             
         return board;
+
+    def show(self, p1, p2):
+        palavrasP1 = deepcopy(p1.words);
+        palavrasP2 = deepcopy(p2.words);
+        maxchar = 35;
+
+        board = "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
+        board = board + "    - - - - - - - - - - - - - - -\n";
+        for i in range(len(self.matrix)):
+
+            lineIndex = str(i);
+
+            # Exibe index da linha:
+            if(i == 10):
+                lineIndex = "A";
+            elif(i == 11):
+                lineIndex = "B";
+            elif(i == 12):
+                lineIndex = "C";
+            elif(i == 13):
+                lineIndex = "D";
+            elif(i == 14):
+                lineIndex = "E";
+
+            board = board + lineIndex + "| ";
+
+            for j in range(len(self.matrix[0])):
+                node = self.matrix[i][j];
+                if(node.value == ' ') and (node.multiplier != '1'):
+                    board = board + " " + node.multiplier;
+                else:
+                    board = board + " " + node.value.upper();
+            
+            # Exibe index da linha:
+            board = board + " |" + lineIndex;
+
+            # Coloca dados das palavras dos jogadores:
+            if(i > 8):
+                
+                nchars = 0;
+                res = "";
+
+                if(len(palavrasP2) > 0):
+                    word = palavrasP2.pop();
+                    res += word + " ";
+                    nchars = len(word);
+
+                while(nchars <= maxchar) and (len(palavrasP2) > 0):
+                    nchars += len(palavrasP2[len(palavrasP2) - 1]);
+                    if(nchars > maxchar):
+                        break;
+
+                    word = palavrasP2.pop();
+                    res += word + " ";
+                    
+                board += "\t" + res;
+
+            elif(i == 8):
+                board += "\tPalavras do " + p2.name + ":";
+            elif(i > 0):
+                nchars = 0;
+                res = "";
+
+                if(len(palavrasP1) > 0):
+                    word = palavrasP1.pop();
+                    res += word + " ";
+                    nchars = len(word);
+
+                while(nchars <= maxchar) and (len(palavrasP1) > 0):
+                    nchars += len(palavrasP1[len(palavrasP1) - 1]);
+                    if(nchars > maxchar):
+                        break;
+
+                    word = palavrasP1.pop();
+                    res += word + " ";
+                    
+                board += "\t" + res;
+            else:
+                board += "\tPalavras do " + p1.name + ":";
+
+            board += "\n";
+
+        board = board + "    - - - - - - - - - - - - - - -\n";
+        board = board + "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
+            
+        print(board);
 
 
 if __name__ == "__main__":

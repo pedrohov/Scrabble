@@ -28,7 +28,7 @@ class Player():
             # Passou o turno:
             if(comando == 'pass'):
                 self.nPass += 1;
-                return self.piecesToChange();
+                return (self.piecesToChange(), None);
             # Sai do jogo:
             elif(comando == 'quit'):
                 exit();
@@ -37,13 +37,14 @@ class Player():
 
         # Faz a jogada se for valida:
         if(move is not None):
-            print("Jogada: ", end='')
-            print(move)
+            print("Jogada: ", end='');
+            print(move);
             self.board.insertWord(move, self);
             self.addWord(move);
             self.nPass = 0;
+            return ({}, move);
         
-        return {};
+        return ({}, None);
 
     def parseMove(self, entrada, primeira=False):
         """ Recebe uma linha do terminal, 
@@ -176,21 +177,20 @@ class Player():
         return brancos;
 
     def firstPlay(self):
-        self.play(True);
+        return self.play(True);
 
     def addWord(self, move):
         self.points += move.value;
-        self.words.append(move);
+        self.words.append(move.word + "(" + str(move.value) + ")");
 
     def piecesToChange(self):
         """ Forma um dicionario de pecas para serem trocadas.
             Troca apenas letras que nao sao vogais.
         """
-        self.showHand();
-        troca  = {};
+        troca = {};
 
         while(True):
-            comando = input("\nInforme as pecas que deseja trocar (separadas por espaco).\n> ");
+            comando = input("Informe as pecas que deseja trocar (separadas por espaco).\n> ");
             pieces = comando.split(' ');
 
             # Passou o turno:
@@ -231,10 +231,11 @@ class Player():
         for letter, piece in self.hand.items():
             for i in range(piece.quantity):
                 res += letter.upper() + " ";
-        print(res);
+        
+        return res;
 
     def __str__(self):
-        return self.name;
+        return self.name + ": " + str(self.points);
 
     def reset(self):
         return;
