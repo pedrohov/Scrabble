@@ -11,10 +11,16 @@ class Player():
 
     def __init__(self, name, board, dictionary):
         self.name   = name; # Nome do jogador.
-        self.hand   = {};   # Pecas na mao do jogador.
         self.words  = [];   # Palavras formadas pelo jogador.
         self.points = 0;    # Pontuacao do jogador.
         self.nPass  = 0;    # Quantidade de vezes que o jogador passou de turno.
+
+        # Pecas na mao do jogador.
+        self.hand = {'#': Piece('#'), 'a': Piece('a'), 'e': Piece('e'), 'i': Piece('i'), 'o': Piece('o'),
+                     's': Piece('s'), 'u': Piece('u'), 'm': Piece('m'), 'r': Piece('r'), 't': Piece('t'),
+                     'd': Piece('d'), 'l': Piece('l'), 'c': Piece('c'), 'p': Piece('p'), 'n': Piece('n'),
+                     'b': Piece('b'), 'ç': Piece('ç'), 'f': Piece('f'), 'g': Piece('g'), 'h': Piece('h'),
+                     'v': Piece('v'), 'j': Piece('j'), 'q': Piece('q'), 'x': Piece('x'), 'z': Piece('z')};
 
         self.board  = board;      # Referencia para a mesa.
         self.dict   = dictionary; # Referencia para o dicionario.
@@ -139,11 +145,11 @@ class Player():
             if(self.board.matrix[lin][col].isEmpty()):
 
                 # Retira peca da mao:
-                if((l in mao) and (mao[l].quantity > 0)):
+                if(mao[l].quantity > 0):
                     mao[l].quantity -= 1;
 
                 # Retira branco da mao:
-                elif(('#' in mao) and (mao['#'].quantity > 0)):
+                elif(mao['#'].quantity > 0):
                     mao['#'].quantity -= 1;
                     brancos[index] = l;
 
@@ -202,7 +208,7 @@ class Player():
             for l in pieces:
                 # Trata apenas pecas em lowercase:
                 l = l.lower();
-                if(l not in self.hand) or (self.hand[l].quantity == 0):
+                if(self.hand[l].quantity == 0):
                     print("Voce nao possui a peca " + l.upper() + ".");
                     erro = True;
                     break;
@@ -231,6 +237,20 @@ class Player():
         for letter, piece in self.hand.items():
             for i in range(piece.quantity):
                 res += letter.upper() + " ";
+        
+        return res;
+
+    def handSize(self):
+        size = 0;
+        for letter, piece in self.hand.items():
+            size += piece.quantity;
+
+        return size;
+
+    def debugHand(self):
+        res = "";
+        for letter, piece in self.hand.items():
+            res += letter + ": " + str(piece.quantity) + "\n";
         
         return res;
 

@@ -10,20 +10,18 @@ from dawg   import *;
 from board  import *;
 from playerIA import *;
 
-import cProfile;
-import re;
-
 class Game():
 
     def __init__(self, boardFile, dawgFile):
         self.dict  = load(dawgFile).root;
         self.board = Board(boardFile, self.dict);
 
-        self.pieces = {'#': 3, 'a': 14, 'e': 11, 'i': 10, 'o': 10,
-                       's': 8, 'u': 7 , 'm': 6 , 'r': 6 , 't': 5 ,
-                       'd': 5, 'l': 5 , 'c': 4 , 'p': 4 , 'n': 4 ,
-                       'b': 3, 'ç': 2 , 'f': 2 , 'g': 2 , 'h': 2 ,
-                       'v': 2, 'j': 2 , 'q': 1 , 'x': 1 , 'z': 1 };
+        self.nPieces = 120;
+        self.pieces  = {'#': 3, 'a': 14, 'e': 11, 'i': 10, 'o': 10,
+                        's': 8, 'u': 7 , 'm': 6 , 'r': 6 , 't': 5 ,
+                        'd': 5, 'l': 5 , 'c': 4 , 'p': 4 , 'n': 4 ,
+                        'b': 3, 'ç': 2 , 'f': 2 , 'g': 2 , 'h': 2 ,
+                        'v': 2, 'j': 2 , 'q': 1 , 'x': 1 , 'z': 1 };
 
         self.player1 = None;
         self.player2 = None;
@@ -66,31 +64,38 @@ class Game():
             # troca as pecas da mao que ele pedir para trocar:
             self.changePieces(pecasTrocar, self.turn);
 
+            # Mantem a mao do jogador com 7 pecas:
+            self.fillHand(self.turn);
+
+            #print(self.turn.debugHand());
+            #print(self.pieces)
+
             # Passa o turno do jogador atual:
             self.changeTurn();
 
             # Checa se o jogo chegou ao fim (ambos os jogadores passaram 2x):
             self.isGameOver();
 
-    def startingHand(self):
+    def fillHand(self, player):
         """ Sorteia uma mao inicial e a retorna como dicionario de Pieces."""
-        res = {};
-        i = 0;
+        res = player.hand;
+        i = player.handSize();
+
         while(i < 7):
+            # Checa se existem pecas no saquinho:
+            if(self.nPieces == 0):
+                return;
+
             # Sorteia uma peca aleatoria:
             (piece, qtd) = random.choice(list(self.pieces.items()));
             if(qtd > 0):
                 # Remove a peca do saquinho:
                 self.pieces[piece] -= 1;
+                self.nPieces -= 1;
                 i += 1;
 
                 # Adiciona a peca a mao:
-                if piece in res:
-                    res[piece].quantity += 1;
-                else:
-                    res[piece] = Piece(piece);
-
-        return res;
+                res[piece].quantity += 1;
 
     def changePieces(self, pieces, player):
         """ Troca as pecas selecionadas pelo jogador.
@@ -103,11 +108,11 @@ class Game():
         qtdSaquinho = 0;
         for piece, quantity in self.pieces.items():
             if quantity > 0:
-                qtdSaquinho += 1;
+                qtdSaquinho += quantity;
 
         for piece, quantity in pieces.items():
             if quantity > 0:
-                qtdPedida += 1;
+                qtdPedida += quantity;
 
         # Foram pedidas mais pecas do que existe no saquinho:
         if(qtdPedida > qtdSaquinho):
@@ -123,19 +128,15 @@ class Game():
                 (new, qtd) = random.choice(list(self.pieces.items()));
 
             # Adiciona a nova peca a mao do jogador:
-            if(new not in player.hand):
-                player.hand[new] = Piece(new);
-            else:
-                player.hand[new].quantity += 1;
+            player.hand[new].quantity += 1;
 
             # Adiciona a peca antiga ao saquinho do jogo:
             self.pieces[piece] += 1;
 
         return;
 
-
     def showBoard(self):
-        #print(self.board);
+        """ Mostra o estado atual do tabuleiro e os dados dos jogadores. """
         self.board.show(self.player1, self.player2);
         print(self.player1.__str__() + "\t" + self.turn.showHand() + "\t" + self.player2.__str__());
 
@@ -151,6 +152,7 @@ class Game():
             self.player2.reset();
 
     def setupPlayers(self, opcao):
+        """ Define os jogadores humano/computador e da a mao inicial. """
         if(opcao == 1):
             self.player1 = Player("JOGADOR 1", self.board, self.dict);
             self.player2 = Player("JOGADOR 2", self.board, self.dict);
@@ -161,8 +163,8 @@ class Game():
             self.player1 = PlayerIA("COM1", self.board, self.dict);
             self.player2 = PlayerIA("COM2", self.board, self.dict);
 
-        self.player1.hand = self.startingHand();
-        self.player2.hand = self.startingHand();
+        self.fillHand(self.player1);
+        self.fillHand(self.player2);
 
         # Sorteia um jogador para comecar:
         if(random.choice([True, False])):
@@ -177,9 +179,15 @@ class Game():
             print("\n# O jogador " + self.turn.name + " passou o turno.\n");
 
     def isGameOver(self):
-        if(self.player1.nPass >= 2) and (self.player2.nPass >= 2):
-            print("Fim do jogo.");
-            exit();
+        """ Determina quando o jogo acaba. """
+
+        # Se nao houve mais pedras no saquinho:
+        if(self.nPieces == 0):
+            # Um jogador ficar sem letras, ou os dois jogadores passarem duas vezes:
+            if((self.player1.handSize() == 0) or (self.player2.handSize() == 0) or
+              ((self.player1.nPass >= 2) and (self.player2.nPass >= 2))):
+                print("Fim do jogo.");
+                exit();
 
 
 if __name__ == "__main__":

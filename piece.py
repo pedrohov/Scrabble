@@ -6,7 +6,7 @@
 class Piece():
 	def __init__(self, letter):
 		self.letter   = letter;
-		self.quantity = 1;
+		self.quantity = 0;
 
 		data = self.getLetterData(letter);
 		self.value = data[0];

@@ -76,16 +76,13 @@ class PlayerIA(Player):
                 # Demais pedras:
                 elif(l in self.hand) and (self.hand[l].quantity > 0):
                     self.hand[l].quantity -= 1;
-                    self.placedNew = True;
                     newRoot = root.edges[l];
                     self.leftPart(word + l, newRoot, limit - 1, square);
                     self.hand[l].quantity += 1;
-                    self.placedNew = False;
 
                 # Trata pedras em branco na mao:
                 elif('#' in self.hand) and (self.hand['#'].quantity > 0):
                     self.hand['#'].quantity -= 1;
-                    self.placedNew = True;
                     newRoot = root.edges[l];
                     
                     # Adiciona a peca em branco a lista:
@@ -96,7 +93,6 @@ class PlayerIA(Player):
                     # Remove a pedra em branco da lista:
                     self.brancos.pop();
                     self.hand['#'].quantity += 1;
-                    self.placedNew = False;
 
         return;
 
@@ -113,7 +109,7 @@ class PlayerIA(Player):
             for l in root.edges:
 
                 # Se a letra 'l' esta na mao do jogador:
-                if(l in self.hand) and (self.hand[l].quantity > 0):
+                if(self.hand[l].quantity > 0):
                     # Define a proxima posicao no tabuleiro:
                     nextSquare = None;
                     if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
@@ -140,7 +136,7 @@ class PlayerIA(Player):
                     self.placedRight -= 1;
 
                 # Trata pedras em branco na mao:
-                elif('#' in self.hand) and (self.hand['#'].quantity > 0):
+                elif(self.hand['#'].quantity > 0):
                     # Define a proxima posicao no tabuleiro:
                     nextSquare = None;
                     if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
@@ -230,7 +226,7 @@ class PlayerIA(Player):
 
         # Se nao foi colocada nenhuma nova peca
         # a jogada gerada eh invalida:
-        if(self.placedNew == False):
+        if(self.placedNew is False):
             return;
 
         if(self.playDir == "H"):
@@ -297,18 +293,19 @@ class PlayerIA(Player):
         for l, piece in self.hand.items():
             # Se a peca nao for uma vogal marca para ser trocada:
             if(l not in vogais) and (self.hand[l].quantity > 0):
-                # Se nao existir no dicionario, cria uma chave nova:
-                if(l not in troca):
-                    troca[l] = 1;
-                # Ou incrementa a quantidade existente:
-                else:
-                    troca[l] += 1;
+                # Adiciona uma unidade da peca para trocar:
+                troca[l] = 1;
 
                 # Remove a peca da mao do jogador:
                 self.hand[l].quantity -= 1;
 
-        # print("#TROCA: ");
-        # print(troca)
+        # Se nao tiver feito nenhuma jogada por dois turnos,
+        # e nao pedir para trocar de pecas, troca ate 3 pecas:
+        if (len(troca) == 0) and (self.nPass >= 2):
+            for l, pieces in self.hand.items():
+                if(self.hand[l].quantity > 0):
+                    troca[l] = 1;
+                    self.hand[l].quantity -= 1;
 
         return troca;
 
