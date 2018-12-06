@@ -11,7 +11,20 @@ class Move():
         self.dir    = direction; # Direcao em que a palavra foi formada (esq -> dir, ou cima -> baixo).
         self.value  = 0;         # Valor da jogada.
 
-        self.brancos = {};      # Informacao das pecas em branco utilizadas na jogada.
+        self.crosswords = [];    # Palavras a mais formadas pela jogada.
+
+        self.brancos = {};       # Informacao das pecas em branco utilizadas na jogada.
+
+    def getWords(self):
+        res = self.word;
+
+        if(len(self.crosswords) > 0):
+            for crossword in self.crosswords:
+                res += ' ' + crossword;
+
+            res = '[' + ", ".join(res.split(' ')) + ']';
+            
+        return res;
 
     def parseBrancos(self, brancos):
         """ [IA] Adiciona conjunto de pecas em branco

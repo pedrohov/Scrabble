@@ -174,7 +174,7 @@ class Game():
 
     def showMove(self, move):
         if(move is not None):
-            print("\n# O jogador " + self.turn.name + " colocou '" + move.word + "' por " + str(move.value) + " pontos.\n");
+            print("\n# O jogador " + self.turn.name + " colocou '" + move.getWords() + "' por " + str(move.value) + " pontos.\n");
         else:
             print("\n# O jogador " + self.turn.name + " passou o turno.\n");
 

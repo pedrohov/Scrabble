@@ -131,7 +131,6 @@ class Board():
 
                     #print("#" + move.word + " -> Formou Vertical: " + crossword);
 
-
                     self.matrix[lin][col].remove();
 
                 col += 1;
@@ -159,82 +158,12 @@ class Board():
 
                 lin += 1;
 
-            if(len(crossword) > 2) and (self.dict.lookup(crossword) == False):
-                return False;
-
-        # for l in move.word:
-
-        #     _lin = lin;
-        #     _col = col;
-        #     crossWord = "";
-
-        #     # Nao checa palavras ja existentes (ancora):
-        #     if(self.matrix[lin][col].isEmpty()):
-
-        #         # Adiciona a letra no tabuleiro para verificacao:
-        #         self.matrix[lin][col].place(l);
-
-        #         # Direcao horizontal checa por crosswords verticais:
-        #         if(move.dir == 'H'):
-
-        #             # Busca o inicio da palavra:
-        #             pedra = self.get(_lin, _col);
-        #             while(pedra != ' '):
-        #                 _lin -= 1;
-        #                 pedra = self.get(_lin, _col);
-
-        #             # Forma a palavra:
-        #             _lin += 1;
-        #             pedra = self.get(_lin, _col);
-        #             while(pedra != ' '):
-        #                 _lin += 1;
-        #                 crossWord += pedra;
-        #                 pedra = self.get(_lin, _col);
-
-        #             #print("> " + move.word + " Vertical: " + crossWord + " (" + str(_lin) + ", " + str(_col) + ")");
-
-        #         # Direcao vertical checa por crosswords horizontais:
-        #         elif(move.dir == 'V'):
-
-        #             # Busca o inicio da palavra:
-        #             pedra = self.get(_lin, _col);
-        #             while(pedra != ' '):
-        #                 _col -= 1;
-        #                 pedra = self.get(_lin, _col);
-
-        #             # Forma a palavra:
-        #             _col += 1;
-        #             pedra = self.get(_lin, _col);
-        #             while(pedra != ' '):
-        #                 _col += 1;
-        #                 crossWord += pedra;
-        #                 pedra = self.get(_lin, _col);
-
-        #             #print("> " + move.word + " Horizontal: " + crossWord + " (" + str(lin) + ", " + str(_col) + ")");
-
-        #         # Remove a letra do tabuleiro:
-        #         self.matrix[lin][col].remove();
-
-        #         # Determina se a letra formada eh valida:
-        #         if(len(crossWord) <= 2):
-        #             continue;
-        #         if(self.dict.lookup(crossWord) is False):
-        #             #print("NAO valido");
-        #             return False;
-
-        #     # Utilizou uma posicao do tabuleiro.
-        #     elif(self.get(lin, col) == l):
-        #         utilizaAncora = True; 
-
-        #      # Tentou substituir uma letra do tabuleiro.
-        #     else:
-        #         return False;
-
-        #     # Determina proxima posicao:
-        #     if(move.dir == 'H'):
-        #         col += 1;
-        #     elif(move.dir == 'V'):
-        #         lin += 1;
+            # Crossword formada nao esta no dicionario:
+            if(len(crossword) > 2):
+                if (self.dict.lookup(crossword) == False):
+                    return False;
+                else:
+                    move.crosswords.append(crossword);
 
         return True;
 
@@ -243,18 +172,14 @@ class Board():
         lin = move.pos[0];
         col = move.pos[1];
 
-        #print(player.showHand());
-
         index = 0;
         for l in move.word:
             if(self.matrix[lin][col].isEmpty()):
                 # Checa se uma pedra em branco foi utilizada:
                 if(index in move.brancos):
                     player.hand['#'].quantity -= 1;
-                    #print("Coloquei # em (" + str(lin) + ", " + str(col) + ").");
                 else:
                     player.hand[l].quantity -= 1;
-                    #print("Coloquei " + l + " em (" + str(lin) + ", " + str(col) + ").");
 
             index += 1;
 
