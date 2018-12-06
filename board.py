@@ -68,6 +68,10 @@ class Board():
     def isValid(self, move, player):
         """ Checa se uma nova pedra colocada no tabuleiro
             gera palavras cruzadas validas.
+
+            1o) Checa se a palavra existe no dicionario.
+            2o) Checa se a palavra utiliza um ponto ancora.
+            3o) Checa se gera outras palavras cruzadas validas.
         """
 
         # Se a palavra nao existir no dicionario
@@ -76,76 +80,17 @@ class Board():
         if((self.dict.lookup(move.word) is False) or (len(move.word) < 2)):
             return False;
 
+        # A nova jogada deve utilizar uma peca do tabuleiro:
         lin = move.pos[0];
         col = move.pos[1];
         utilizaAncora = False;
 
         for l in move.word:
-
-            _lin = lin;
-            _col = col;
-            crossWord = "";
-
-            # Nao checa palavras ja existentes (ancora):
-            if(self.matrix[lin][col].isEmpty()):
-
-                # Adiciona a letra no tabuleiro para verificacao:
-                self.matrix[lin][col].place(l);
-
-                # Direcao horizontal checa por crosswords verticais:
-                if(move.dir == 'H'):
-
-                    # Busca o inicio da palavra:
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _lin -= 1;
-                        pedra = self.get(_lin, _col);
-
-                    # Forma a palavra:
-                    _lin += 1;
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _lin += 1;
-                        crossWord += pedra;
-                        pedra = self.get(_lin, _col);
-
-                    #print("> " + move.word + " Vertical: " + crossWord + " (" + str(_lin) + ", " + str(_col) + ")");
-
-                # Direcao vertical checa por crosswords horizontais:
-                elif(move.dir == 'V'):
-
-                    # Busca o inicio da palavra:
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _col -= 1;
-                        pedra = self.get(_lin, _col);
-
-                    # Forma a palavra:
-                    _col += 1;
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _col += 1;
-                        crossWord += pedra;
-                        pedra = self.get(_lin, _col);
-
-                    #print("> " + move.word + " Horizontal: " + crossWord + " (" + str(lin) + ", " + str(_col) + ")");
-
-                # Remove a letra do tabuleiro:
-                self.matrix[lin][col].remove();
-
-                # Determina se a letra formada eh valida:
-                if(len(crossWord) <= 2):
-                    continue;
-                if(self.dict.lookup(crossWord) is False):
-                    #print("NAO valido");
-                    return False;
-
-            # Utilizou uma posicao do tabuleiro.
-            elif(self.get(lin, col) == l):
-                utilizaAncora = True; 
-
-             # Tentou substituir uma letra do tabuleiro.
-            else:
+            if(self.get(lin, col) == l):
+                utilizaAncora = True;
+                break;
+            # Tentou substituir uma pedra do tabuleiro:
+            elif(self.get(lin, col) != ' '):
                 return False;
 
             # Determina proxima posicao:
@@ -153,6 +98,143 @@ class Board():
                 col += 1;
             elif(move.dir == 'V'):
                 lin += 1;
+
+        if(utilizaAncora == False) and (self.get(7,7) != ' '):
+            return False;
+
+        # A nova jogada nao deve criar outras palavras invalidas:
+        lin = move.pos[0];
+        col = move.pos[1];
+
+        for l in move.word:
+
+            crossword = "";
+            empty = False;
+
+            if(move.dir == "H"):
+
+                if(self.get(lin, col) == ' '):
+                    self.matrix[lin][col].place(l);
+
+                    _lin = lin;
+                    pedra = self.get(_lin, col);
+                    while(pedra != ' '):
+                        _lin -= 1;
+                        pedra = self.get(_lin, col);
+
+                    _lin += 1;
+                    pedra = self.get(_lin, col);
+                    while(pedra != ' '):
+                        _lin += 1;
+                        crossword += pedra;
+                        pedra = self.get(_lin, col);
+
+                    #print("#" + move.word + " -> Formou Vertical: " + crossword);
+
+
+                    self.matrix[lin][col].remove();
+
+                col += 1;
+            elif(move.dir == "V"):
+
+                if(self.get(lin, col) == ' '):
+                    self.matrix[lin][col].place(l);
+
+                    _col = col;
+                    pedra = self.get(lin, _col);
+                    while(pedra != ' '):
+                        _col -= 1;
+                        pedra = self.get(lin, _col);
+
+                    _col += 1;
+                    pedra = self.get(lin, _col);
+                    while(pedra != ' '):
+                        _col += 1;
+                        crossword += pedra;
+                        pedra = self.get(lin, _col);
+
+                    #print("#" + move.word + " -> Formou Horizontal: " + crossword);
+
+                    self.matrix[lin][col].remove();
+
+                lin += 1;
+
+            if(len(crossword) > 2) and (self.dict.lookup(crossword) == False):
+                return False;
+
+        # for l in move.word:
+
+        #     _lin = lin;
+        #     _col = col;
+        #     crossWord = "";
+
+        #     # Nao checa palavras ja existentes (ancora):
+        #     if(self.matrix[lin][col].isEmpty()):
+
+        #         # Adiciona a letra no tabuleiro para verificacao:
+        #         self.matrix[lin][col].place(l);
+
+        #         # Direcao horizontal checa por crosswords verticais:
+        #         if(move.dir == 'H'):
+
+        #             # Busca o inicio da palavra:
+        #             pedra = self.get(_lin, _col);
+        #             while(pedra != ' '):
+        #                 _lin -= 1;
+        #                 pedra = self.get(_lin, _col);
+
+        #             # Forma a palavra:
+        #             _lin += 1;
+        #             pedra = self.get(_lin, _col);
+        #             while(pedra != ' '):
+        #                 _lin += 1;
+        #                 crossWord += pedra;
+        #                 pedra = self.get(_lin, _col);
+
+        #             #print("> " + move.word + " Vertical: " + crossWord + " (" + str(_lin) + ", " + str(_col) + ")");
+
+        #         # Direcao vertical checa por crosswords horizontais:
+        #         elif(move.dir == 'V'):
+
+        #             # Busca o inicio da palavra:
+        #             pedra = self.get(_lin, _col);
+        #             while(pedra != ' '):
+        #                 _col -= 1;
+        #                 pedra = self.get(_lin, _col);
+
+        #             # Forma a palavra:
+        #             _col += 1;
+        #             pedra = self.get(_lin, _col);
+        #             while(pedra != ' '):
+        #                 _col += 1;
+        #                 crossWord += pedra;
+        #                 pedra = self.get(_lin, _col);
+
+        #             #print("> " + move.word + " Horizontal: " + crossWord + " (" + str(lin) + ", " + str(_col) + ")");
+
+        #         # Remove a letra do tabuleiro:
+        #         self.matrix[lin][col].remove();
+
+        #         # Determina se a letra formada eh valida:
+        #         if(len(crossWord) <= 2):
+        #             continue;
+        #         if(self.dict.lookup(crossWord) is False):
+        #             #print("NAO valido");
+        #             return False;
+
+        #     # Utilizou uma posicao do tabuleiro.
+        #     elif(self.get(lin, col) == l):
+        #         utilizaAncora = True; 
+
+        #      # Tentou substituir uma letra do tabuleiro.
+        #     else:
+        #         return False;
+
+        #     # Determina proxima posicao:
+        #     if(move.dir == 'H'):
+        #         col += 1;
+        #     elif(move.dir == 'V'):
+        #         lin += 1;
 
         return True;
 

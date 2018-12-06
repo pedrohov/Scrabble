@@ -45,7 +45,7 @@ class PlayerIA(Player):
             self.playDir = anchor[0];
 
             # Forma palavras:
-            self.leftPart("", self.dict, 10, anchor[1]);
+            self.leftPart("", self.dict, anchor[2], anchor[1]);
 
         # Faz a melhor jogada encontrada:
         if(self.bestMove is None):
@@ -266,7 +266,20 @@ class PlayerIA(Player):
                             i += 1;
                             square = self.board.matrix[lin - i][col];
 
-                        self.anchors.append(("V", self.board.matrix[lin - i + 2][col]));
+                        # Determina o limite do prefixo:
+                        j = lin - i + 1;
+                        limite = 0;
+                        square = self.board.getSquare(j, col);
+                        while(square is not None) and (square.isEmpty()):
+                            j -= 1;
+                            limite += 1;
+                            square = self.board.getSquare(j, col);
+
+                        # Chegou em outra palavra:
+                        if(square is not None):
+                            limite -= 1; # Da um espaco em branco de distancia.
+
+                        self.anchors.append(("V", self.board.matrix[lin - i + 2][col], limite));
 
                 # Se a coluna for valida:
                 if((col >= 1) and (col < 15)):
@@ -280,7 +293,20 @@ class PlayerIA(Player):
                             i += 1;
                             square = self.board.matrix[lin][col - i];
 
-                        self.anchors.append(("H", self.board.matrix[lin][col - i + 2]));
+                        # Determina o limite do prefixo:
+                        j = col - i + 1;
+                        limite = 0;
+                        square = self.board.getSquare(lin, j);
+                        while(square is not None) and (square.isEmpty()):
+                            j -= 1;
+                            limite += 1;
+                            square = self.board.getSquare(lin, j);
+
+                        # Chegou em outra palavra:
+                        if(square is not None):
+                            limite -= 1; # Da um espaco em branco de distancia.
+
+                        self.anchors.append(("H", self.board.matrix[lin][col - i + 2], limite));
                         #self.anchors.append(("H", self.board.matrix[lin][col]));
 
     def piecesToChange(self):
