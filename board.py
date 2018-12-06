@@ -109,7 +109,7 @@ class Board():
                         crossWord += pedra;
                         pedra = self.get(_lin, _col);
 
-                    #print("> " + move.word + " Vertical: " + crossWord);
+                    #print("> " + move.word + " Vertical: " + crossWord + " (" + str(_lin) + ", " + str(_col) + ")");
 
                 # Direcao vertical checa por crosswords horizontais:
                 elif(move.dir == 'V'):
@@ -128,7 +128,7 @@ class Board():
                         crossWord += pedra;
                         pedra = self.get(_lin, _col);
 
-                    #print("> " + move.word + " Horizontal: " + crossWord);
+                    #print("> " + move.word + " Horizontal: " + crossWord + " (" + str(lin) + ", " + str(_col) + ")");
 
                 # Remove a letra do tabuleiro:
                 self.matrix[lin][col].remove();
@@ -137,6 +137,7 @@ class Board():
                 if(len(crossWord) <= 2):
                     continue;
                 if(self.dict.lookup(crossWord) is False):
+                    #print("NAO valido");
                     return False;
 
             # Utilizou uma posicao do tabuleiro.

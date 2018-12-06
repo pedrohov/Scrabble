@@ -101,8 +101,19 @@ class PlayerIA(Player):
             Poda palavra formada cria-se uma nova jogada,
             mantendo a que garantir mais pontos.
         """
+
+        # Define a proxima posicao no tabuleiro:
+        nextSquare = None;
+        if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
+            nextSquare = self.board.matrix[square.pos[0] + 1][square.pos[1]];
+        elif((self.playDir == "H") and (square.pos[1] + 1 < 15)):
+            nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
+
         if(square.isEmpty()):
-            if(root.final == True):
+
+            # Se a palavra for final no dicionario e a proxima posicao no tabuleiro estiver vazia:
+            if(root.final == True) and (nextSquare is None or (nextSquare.isEmpty())):
+            #if(root.final == True):
                 # Cria uma nova jogada:
                 self.generateMove(word, square);
 
@@ -110,12 +121,7 @@ class PlayerIA(Player):
 
                 # Se a letra 'l' esta na mao do jogador:
                 if(self.hand[l].quantity > 0):
-                    # Define a proxima posicao no tabuleiro:
-                    nextSquare = None;
-                    if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
-                        nextSquare = self.board.matrix[square.pos[0] + 1][square.pos[1]];
-                    elif((self.playDir == "H") and (square.pos[1] + 1 < 15)):
-                        nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
+                    
                     if(nextSquare is None):
                         return;
 
@@ -137,12 +143,7 @@ class PlayerIA(Player):
 
                 # Trata pedras em branco na mao:
                 elif(self.hand['#'].quantity > 0):
-                    # Define a proxima posicao no tabuleiro:
-                    nextSquare = None;
-                    if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
-                        nextSquare = self.board.matrix[square.pos[0] + 1][square.pos[1]];
-                    elif((self.playDir == "H") and (square.pos[1] + 1 < 15)):
-                        nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
+                    
                     if(nextSquare is None):
                         return;
 
@@ -171,13 +172,11 @@ class PlayerIA(Player):
             l = square.value;
             if(l in root.edges):
                 if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
-                    nextSquare = self.board.matrix[square.pos[0] + 1][square.pos[1]];
                     newRoot = root.edges[l];
                     self.placedRight += 1;
                     self.extendRight(word + l, newRoot, nextSquare);
                     self.placedRight -= 1;
                 elif((self.playDir == "H") and (square.pos[1] + 1 < 15)):
-                    nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
                     newRoot = root.edges[l];
                     self.placedRight += 1;
                     self.extendRight(word + l, newRoot, nextSquare);
@@ -290,20 +289,22 @@ class PlayerIA(Player):
         """
         vogais = ['a', 'e', 'i', 'o', 'u', '#'];
         troca  = {};
-        for l, piece in self.hand.items():
-            # Se a peca nao for uma vogal marca para ser trocada:
-            if(l not in vogais) and (self.hand[l].quantity > 0):
-                # Adiciona uma unidade da peca para trocar:
-                troca[l] = 1;
-
-                # Remove a peca da mao do jogador:
-                self.hand[l].quantity -= 1;
 
         # Se nao tiver feito nenhuma jogada por dois turnos,
-        # e nao pedir para trocar de pecas, troca ate 3 pecas:
+        # e nao pedir para trocar de pecas, substitui a mao:
         if (len(troca) == 0) and (self.nPass >= 2):
             for l, pieces in self.hand.items():
                 if(self.hand[l].quantity > 0):
+                    # Adiciona uma unidade da peca para trocar:
+                    troca[l] = 1;
+                    # Remove a peca da mao do jogador:
+                    self.hand[l].quantity -= 1;
+
+        # Ou troca somente pecas que nao forem vogais:
+        else:
+            for l, piece in self.hand.items():
+                # Se a peca nao for uma vogal marca para ser trocada:
+                if(l not in vogais) and (self.hand[l].quantity > 0):
                     troca[l] = 1;
                     self.hand[l].quantity -= 1;
 

@@ -3,63 +3,22 @@
 # Pedro Henrique Oliveira Veloso (0002346)
 # Saulo Ricardo Dias Fernandes   (0021581)
 
-# Adaptado de: Steve Hanov, 2011. Released to the public domain.
-
 import sys;
 import time;
 import pickle;
 
-# This class represents a node in the directed acyclic word graph (DAWG). It
-# has a list of edges to other nodes. It has functions for testing whether it
-# is equivalent to another node. Nodes are equivalent if they have identical
-# edges, and each identical edge leads to identical states. The __hash__ and
-# __eq__ functions allow it to be used as a key in a python dictionary.
 class DawgNode:
     NextId = 0
     
     def __init__(self):
-        self.id = DawgNode.NextId
-        DawgNode.NextId += 1
-        self.final = False
-        self.edges = {}
+        # Dicionario de nos:
+        self.edges = {};    	
 
-        # Number of end nodes reachable from this one.
-        self.count = 0
-
-    def __str__(self):        
-        arr = []
-        if self.final: 
-            arr.append("1")
-        else:
-            arr.append("0")
-
-        for (label, node) in self.edges.items():
-            arr.append( label )
-            arr.append( str( node.id ) )
-
-        return "_".join(arr)
-
-    def __hash__(self):
-        return self.__str__().__hash__()
-
-    def __eq__(self, other):
-        return self.__str__() == other.__str__()
-
-    def numReachable(self):
-        # if a count is already assigned, return it
-        if self.count: return self.count
-
-        # count the number of final nodes that are reachable from this one.
-        # including self
-        count = 0
-        if self.final: count += 1
-        for label, node in self.edges.items():
-            count += node.numReachable()
-
-        self.count = count
-        return count;
+        # Determina se o no e uma palavra:
+        self.final = False;
 
     def lookup(self, word):
+        """ Consulta a partir deste no se a palavra 'word' existe. """
         node = self;
         for letter in word:
             if letter not in node.edges:
@@ -70,63 +29,26 @@ class DawgNode:
 
 class Dawg:
     def __init__(self):
-        self.previousWord = "";
+        # Raiz do DAWG:
         self.root = DawgNode();
 
-        # Here is a list of nodes that have not been checked for duplication.
-        self.uncheckedNodes = [];
-
-        # Here is a list of unique nodes that have been checked for
-        # duplication.
-        self.minimizedNodes = {};
+        # Nos criados:
+        self.nodes = [];
 
     def insert(self, word):
-        if(word < self.previousWord):
-            raise Exception("Error: Words must be inserted in alphabetical " + "order.");
+        """ Adiciona uma nova palavra ao DAWG. """
 
-        # find common prefix between word and previous word
-        commonPrefix = 0;
-        for i in range(min(len(word), len(self.previousWord))):
-            if word[i] != self.previousWord[i]:
-                break;
-            commonPrefix += 1;
-
-        # Check the uncheckedNodes for redundant nodes, proceeding from last
-        # one down to the common prefix size. Then truncate the list at that
-        # point.
-        self._minimize(commonPrefix);
-
-        # add the suffix, starting from the correct node mid-way through the
-        # graph
-        if(len(self.uncheckedNodes) == 0):
-            node = self.root
-        else:
-            node = self.uncheckedNodes[-1][2]
-
-        for letter in word[commonPrefix:]:
-            nextNode = DawgNode();
-            node.edges[letter] = nextNode;
-            self.uncheckedNodes.append((node, letter, nextNode));
-            node = nextNode;
+        node = self.root;
+        for letter in word:
+            if(letter in node.edges):
+                node = node.edges[letter];
+            else:
+                nextNode = DawgNode();
+                node.edges[letter] = nextNode;
+                node = nextNode;
+                self.nodes.append(nextNode);
 
         node.final = True;
-        self.previousWord = word;
-
-    def finish(self):
-        # minimize all uncheckedNodes
-        self._minimize(0);
-
-    def _minimize(self, downTo):
-        # proceed from the leaf up to a certain point
-        for i in range(len(self.uncheckedNodes) - 1, downTo - 1, -1):
-            (parent, letter, child) = self.uncheckedNodes[i];
-            if child in self.minimizedNodes:
-                # replace the child with the previously encountered one
-                parent.edges[letter] = self.minimizedNodes[child];
-            else:
-                # add the state to the minimized nodes.
-                self.minimizedNodes[child] = child;
-            self.uncheckedNodes.pop();
 
     def lookup(self, word):
         node = self.root;
@@ -138,11 +60,11 @@ class Dawg:
         return node.final;    
 
     def nodeCount(self):
-        return len(self.minimizedNodes);
+        return len(self.nodes);
 
     def edgeCount(self):
         count = 0;
-        for node in self.minimizedNodes:
+        for node in self.nodes:
             count += len(node.edges);
         return count;
 
@@ -154,15 +76,12 @@ class Dawg:
         for word in words:
             WordCount += 1;
             dawg.insert(word);
-            if (( WordCount % 100 ) == 0):
+            if ((WordCount % 100) == 0):
                 print("%d" % WordCount);
-        dawg.finish();
-        print("Dawg creation took %g s" % (time.time()-start));
+        print("A criacao do DAWG demorou %g s" % (time.time()-start));
 
         EdgeCount = dawg.edgeCount();
-        print("Read %d words into %d nodes and %d edges" % (WordCount,
-                dawg.nodeCount(), EdgeCount));
-        print("This could be stored in as little as %d bytes" % (EdgeCount * 4));
+        print("Foram lidas %d palavras em %d nos e %d arestas" % (WordCount, dawg.nodeCount(), EdgeCount));
 
     def save(self, local):
         file = open(local, "wb");
@@ -177,17 +96,17 @@ def load(local):
 
 if __name__ == "__main__":
     # Criar dawg:
-    # dawg = Dawg();
-    # dawg.create("dict.txt");
-    # dawg.save("dict.dawg");
+    dawg = Dawg();
+    dawg.create("dict.txt");
+    dawg.save("dict.dawg");
 
     # Carregar arq binario:
-    dawg = load("dict.dawg");
+    #dawg = load("dict.dawg");
 
     # Pesquisa por palavras passadas por parametro:
     QUERY = sys.argv[1:];
     for word in QUERY:
         if not dawg.lookup( word ):
-            print( "%s not in dictionary." % word)
+            print( "%s NAO esta no dicionario." % word)
         else:
-            print ("%s is in the dictionary." % word)
+            print ("%s esta no dicionario." % word)

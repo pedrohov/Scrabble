@@ -6,8 +6,8 @@
 from player import *;
 from piece  import *;
 from move   import *;
-from dawg   import *;
 from board  import *;
+from dawgMin   import *;
 from playerIA import *;
 
 class Game():
@@ -174,7 +174,7 @@ class Game():
 
     def showMove(self, move):
         if(move is not None):
-            print("\n# O jogador " + self.turn.name + " colocou " + move.word + " por " + str(move.value) + " pontos.\n");
+            print("\n# O jogador " + self.turn.name + " colocou '" + move.word + "' por " + str(move.value) + " pontos.\n");
         else:
             print("\n# O jogador " + self.turn.name + " passou o turno.\n");
 
@@ -188,7 +188,10 @@ class Game():
               ((self.player1.nPass >= 2) and (self.player2.nPass >= 2))):
                 print("Fim do jogo.");
                 exit();
-
+        # Se houverem 6 turnos sem jogadas:
+        elif((self.player1.nPass >= 6) and (self.player2.nPass >= 6)):
+                print("Fim do jogo.");
+                exit();
 
 if __name__ == "__main__":
     jogo = Game("board.txt", "dict.dawg");

@@ -103,7 +103,7 @@ class Player():
             return None;
 
         # Determina a palavra:
-        palavra = comando[3];
+        palavra = comando[3].lower();
         brancos = self.findBlankPieces(palavra, (lin, col), direc.upper(), primeira);
 
         # Palavra possui pedras que o jogador nao tem:
