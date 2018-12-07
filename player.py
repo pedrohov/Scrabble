@@ -121,7 +121,9 @@ class Player():
             return None;
 
         # Verifica se a jogada utiliza uma palavra no tabuleiro:
-
+        if(primeira and (self.usaCentro(jogada) == False)):
+            print("A primeira jogada deve utilizar o centro '$' do tabuleiro.");
+            return None;
 
         # Determina a pontuacao da jogada:
         jogada.value = self.board.calcMovePoints(jogada);
@@ -184,6 +186,21 @@ class Player():
 
     def firstPlay(self):
         return self.play(True);
+
+    def usaCentro(self, move):
+        lin = move.pos[0];
+        col = move.pos[1];
+        for l in move.word:
+
+            if(lin == 7) and (col == 7):
+                return True;
+
+            if(move.dir == "H"):
+                col += 1;
+            elif(move.dir == "V"):
+                lin += 1;
+
+        return False;
 
     def addWord(self, move):
         self.points += move.value;

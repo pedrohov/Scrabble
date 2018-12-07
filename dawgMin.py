@@ -156,7 +156,7 @@ class DawgMin:
 
     def create(self, local):
         WordCount = 0;
-        words = open(local, "rt").read().split();
+        words = open(local, "rt", encoding="latin1").read().split();
         words.sort();
         start = time.time(); 
         for word in words:
@@ -176,7 +176,7 @@ class DawgMin:
         file.close();
 
 def load(local):
-    file = open(local, "rb")
+    file = open(local, "rb");
     dawg = pickle.load(file);
     file.close();
     return dawg;

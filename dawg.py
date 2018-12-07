@@ -70,7 +70,7 @@ class Dawg:
 
     def create(self, local):
         WordCount = 0;
-        words = open(local, "rt").read().split();
+        words = open(local, "rt", encoding="latin1").read().split();
         words.sort();
         start = time.time(); 
         for word in words:

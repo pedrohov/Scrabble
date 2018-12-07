@@ -230,15 +230,12 @@ class Board():
     def calcMovePoints(self, move):
         lin = move.pos[0];
         col = move.pos[1];
-
         pts = 0;
-        ptsPalavrasAdd = 0;
         multWord = 1;
         index = 0;
 
+        # Calcula pontuacao da palavra:
         for l in move.word:
-
-            # Pontuacao da palavra atual:
             # Pega dados da pedra:
             if(index in move.brancos):
                 pt = Piece.getLetterData('#', l)[0];
@@ -258,104 +255,6 @@ class Board():
             else:
                 pts = pts + pt;
 
-            # Pontuacao de eventuais palavras formadas a mais:
-            _lin = lin;
-            _col = col;
-            _pts = 0;
-            _multWord = 1;
-            crossWord = "";
-
-            # Nao checa palavras ja existentes (ancora):
-            if(self.matrix[lin][col].isEmpty()):
-
-                # Adiciona a letra no tabuleiro para verificacao:
-                self.matrix[lin][col].place(l);
-
-                # Direcao horizontal checa por crosswords verticais:
-                if(move.dir == 'H'):
-
-                    # Busca o inicio da palavra:
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _lin -= 1;
-                        pedra = self.get(_lin, _col);
-
-                    # Forma a palavra:
-                    _lin += 1;
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _lin += 1;
-                        crossWord += pedra;
-
-                        # Adiciona pontuacao:
-                        _pt = Piece.getLetterData(Piece, pedra)[0];
-                        square = self.getSquare(_lin, _col);
-                        if(square is None):
-                            break;
-
-                        if((square.multiplier == "$") or (square.multiplier == "*")):
-                            _multWord = _multWord * 2;
-                            _pts = _pts + _pt;
-                        elif(square.multiplier == "-"):
-                            _pts = _pts + _pt * 2;
-                        elif(square.multiplier == "+"):
-                            _pts = _pts + _pt * 3;
-                        elif(square.multiplier == "@"):
-                            _multWord = _multWord * 3;
-                        else:
-                            _pts = _pts + _pt;
-
-                        pedra = self.get(_lin, _col);
-
-                # Direcao vertical checa por crosswords horizontais:
-                elif(move.dir == 'V'):
-
-                    # Busca o inicio da palavra:
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _col -= 1;
-                        pedra = self.get(_lin, _col);
-
-                    # Forma a palavra:
-                    _col += 1;
-                    pedra = self.get(_lin, _col);
-                    while(pedra != ' '):
-                        _col += 1;
-                        crossWord += pedra;
-
-                        # Adiciona pontuacao:
-                        _pt = Piece.getLetterData(Piece, pedra)[0];
-                        square = self.getSquare(_lin, _col);
-                        if(square is None):
-                            break;
-
-                        if((square.multiplier == "$") or (square.multiplier == "*")):
-                            _multWord = _multWord * 2;
-                            _pts = _pts + _pt;
-                        elif(square.multiplier == "-"):
-                            _pts = _pts + _pt * 2;
-                        elif(square.multiplier == "+"):
-                            _pts = _pts + _pt * 3;
-                        elif(square.multiplier == "@"):
-                            _multWord = _multWord * 3;
-                        else:
-                            _pts = _pts + _pt;
-
-                        pedra = self.get(_lin, _col);
-
-                # Remove a letra do tabuleiro:
-                self.matrix[lin][col].remove();
-
-                # Determina se a letra formada eh valida:
-                if(len(crossWord) <= 2):
-                    continue;
-                if(self.dict.lookup(crossWord) is False):
-                    return False;
-
-                # Acumula pontos de palavras formadas a mais:
-                ptsPalavrasAdd += _pts;
-
-            # Determina proxima posicao:
             if(move.dir == 'H'):
                 col += 1;
             elif(move.dir == 'V'):
@@ -363,12 +262,114 @@ class Board():
 
             index += 1;
 
+        # Calcula pontuacao das demais:
+        lin = move.pos[0];
+        col = move.pos[1];
+        index = 0;
+        for l in move.word:
+
+            crossword = "";
+            empty = False;
+
+            # Pega dados da pedra:
+            if(index in move.brancos):
+                _pt = Piece.getLetterData('#', l)[0];
+            else:
+                _pt = Piece.getLetterData(Piece, l)[0];
+
+                _multWord = 1;
+                _pts = 0;
+
+            index += 1;
+
+            if(move.dir == "H"):
+
+                if(self.get(lin, col) == ' '):
+                    self.matrix[lin][col].place(l);
+
+                    _lin = lin;
+                    pedra = self.get(_lin, col);
+                    while(pedra != ' '):
+                        _lin -= 1;
+                        pedra = self.get(_lin, col);
+
+                    _lin += 1;
+                    pedra = self.get(_lin, col);
+                    while(pedra != ' '):
+                        _lin += 1;
+                        crossword += pedra;
+                        pedra = self.get(_lin, col);
+
+                    self.matrix[lin][col].remove();
+
+                    square = self.matrix[lin][col];
+                    if((square.multiplier == "$") or (square.multiplier == "*")):
+                        _multWord = _multWord * 2;
+                        _pts = _pts + _pt;
+                    elif(square.multiplier == "-"):
+                        _pts = _pts + _pt * 2;
+                    elif(square.multiplier == "+"):
+                        _pts = _pts + _pt * 3;
+                    elif(square.multiplier == "@"):
+                        _multWord = _multWord * 3;
+                    else:
+                        _pts = _pts + _pt;
+
+                    _pts = _pts * _multWord;
+
+                col += 1;
+            elif(move.dir == "V"):
+
+                if(self.get(lin, col) == ' '):
+                    self.matrix[lin][col].place(l);
+
+                    _col = col;
+                    pedra = self.get(lin, _col);
+                    while(pedra != ' '):
+                        _col -= 1;
+                        pedra = self.get(lin, _col);
+
+                    _col += 1;
+                    pedra = self.get(lin, _col);
+                    while(pedra != ' '):
+                        _col += 1;
+                        crossword += pedra;
+                        pedra = self.get(lin, _col);
+
+                    self.matrix[lin][col].remove();
+
+                    square = self.matrix[lin][col];
+                    if((square.multiplier == "$") or (square.multiplier == "*")):
+                        _multWord = _multWord * 2;
+                        _pts = _pts + _pt;
+                    elif(square.multiplier == "-"):
+                        _pts = _pts + _pt * 2;
+                    elif(square.multiplier == "+"):
+                        _pts = _pts + _pt * 3;
+                    elif(square.multiplier == "@"):
+                        _multWord = _multWord * 3;
+                    else:
+                        _pts = _pts + _pt;
+
+                    _pts = _pts * _multWord;
+
+                lin += 1;
+
+            # Crossword formada nao esta no dicionario:
+            if(len(crossword) > 2):
+                if (self.dict.lookup(crossword) == False):
+                    return False;
+                else:
+                    move.crosswords.append(crossword);
+                    pts = pts + _pts;
+
+            index += 1;
+
         pts = pts * multWord;
-        pts += ptsPalavrasAdd;
 
         return pts;
 
-    def calcMovePointsOldie(self, move):
+    def calcMovePointsExtraOldie(self, move):
         """ Calcula e define a quantidade de pontos
             de uma jogada valida 'move'.
         """

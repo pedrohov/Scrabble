@@ -4,6 +4,7 @@
 # Saulo Ricardo Dias Fernandes   (0021581)
 
 from player import *;
+from random import choice;
 
 class PlayerIA(Player):
 
@@ -33,6 +34,7 @@ class PlayerIA(Player):
 
         # Determina todos os pontos ancora:
         self.getAnchors();
+        #self.debugAnchors();
 
         for anchor in self.anchors:
             # print(anchor[0], end=' ')
@@ -187,9 +189,8 @@ class PlayerIA(Player):
         """ Faz a primeira jogada. """
 
         hand = self.hand;
-        limit = 7;
         square = self.board.matrix[7][7];
-        self.playDir = "V";
+        self.playDir = choice(['V', 'H']);
         
         # Cria palavras com as pecas da mao do jogador
         # usando cada letra como ancora uma vez:
@@ -203,7 +204,7 @@ class PlayerIA(Player):
             self.anchor = (letter, square);
 
             # Forma palavras:
-            self.leftPart("", self.dict, limit, square);
+            self.leftPart("", self.dict, 7, square);
 
             # Devolve a peca:
             hand[letter].quantity += 1;
@@ -255,7 +256,7 @@ class PlayerIA(Player):
             for col in range(len(self.board.matrix[lin])):
                 
                 # Se a linha for valida:
-                if((lin >= 1) and (lin < 15)):
+                if((lin >= 0) and (lin < 15)):
                     # Se a posicao acima estiver vazia, marca esta como ancora:
                     if((self.board.matrix[lin - 1][col].isEmpty()) and (self.board.matrix[lin][col].isEmpty() == False)):
 
@@ -279,10 +280,11 @@ class PlayerIA(Player):
                         if(square is not None):
                             limite -= 1; # Da um espaco em branco de distancia.
 
-                        self.anchors.append(("V", self.board.matrix[lin - i + 2][col], limite));
+                        if(limite > -1):
+                            self.anchors.append(("V", self.board.matrix[lin - i + 2][col], limite));
 
                 # Se a coluna for valida:
-                if((col >= 1) and (col < 15)):
+                if((col >= 0) and (col < 15)):
                     # Se a posicao a esquerda estiver vazia, marca esta como ancora:
                     if((self.board.matrix[lin][col - 1].isEmpty()) and (self.board.matrix[lin][col].isEmpty() == False)):
 
@@ -306,7 +308,8 @@ class PlayerIA(Player):
                         if(square is not None):
                             limite -= 1; # Da um espaco em branco de distancia.
 
-                        self.anchors.append(("H", self.board.matrix[lin][col - i + 2], limite));
+                        if(limite > -1):
+                            self.anchors.append(("H", self.board.matrix[lin][col - i + 2], limite));
                         #self.anchors.append(("H", self.board.matrix[lin][col]));
 
     def piecesToChange(self):
@@ -347,3 +350,9 @@ class PlayerIA(Player):
         self.placedNew   = False;
         self.placedRight = 0;
         self.brancos  = [];
+
+    def debugAnchors(self):
+        for anchor in self.anchors:
+            print(anchor[0] + ' (', end='');
+            print(anchor[1], end='');
+            print(' Limit: ' + str(anchor[2]));

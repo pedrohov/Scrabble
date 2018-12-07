@@ -7,7 +7,7 @@ from player import *;
 from piece  import *;
 from move   import *;
 from board  import *;
-from dawgMin   import *;
+from dawgMin  import *;
 from playerIA import *;
 
 class Game():
