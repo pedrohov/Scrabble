@@ -34,7 +34,7 @@ class PlayerIA(Player):
 
         # Determina todos os pontos ancora:
         self.getAnchors();
-        #self.debugAnchors();
+        # self.debugAnchors();
 
         for anchor in self.anchors:
             # print(anchor[0], end=' ')
@@ -236,12 +236,16 @@ class PlayerIA(Player):
             anchor = self.anchor[1];
             iniX = square.pos[0] - len(word);
             newMove = Move(word, (iniX, square.pos[1]), "V");
-        newMove.value = self.board.calcMovePoints(newMove);
-        newMove.parseBrancos(self.brancos);
 
         # A jogada criada nao eh valida
         if(self.board.isValid(newMove, self) is False):
             return;
+
+        # Informa os coringas utilizados se ouver:
+        newMove.parseBrancos(self.brancos);
+
+        # Calcula a pontuacao da jogada:
+        newMove.value = self.board.calcMovePoints(newMove);
 
         # Mantem a melhor jogada salva em 'self.bestMove':
         if((self.bestMove is None) or (newMove.value > self.bestMove.value)):

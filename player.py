@@ -203,8 +203,20 @@ class Player():
         return False;
 
     def addWord(self, move):
-        self.points += move.value;
-        self.words.append(move.word + "(" + str(move.value) + ")");
+
+        if(len(move.crosswords) > 0):
+            res = move.word + '(' + str(move.value) + ')';
+            points = move.value;
+            if(len(move.crosswords) > 0):
+                for crossword in move.crosswords:
+                    points += crossword[1];
+                    res += ' ' + crossword[0] + '(' + str(crossword[1]) + ')';
+
+                res = '[' + ", ".join(res.split(' ')) + ']';
+                self.words.append(res);
+        else:
+            self.points += move.value;
+            self.words.append(move.word + "(" + str(move.value) + ")");
 
     def piecesToChange(self):
         """ Forma um dicionario de pecas para serem trocadas.

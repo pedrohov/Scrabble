@@ -20,7 +20,7 @@ class Move():
 
         if(len(self.crosswords) > 0):
             for crossword in self.crosswords:
-                res += ' ' + crossword;
+                res += ' ' + crossword[0];
 
             res = '[' + ", ".join(res.split(' ')) + ']';
             

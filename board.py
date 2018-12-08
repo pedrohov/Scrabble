@@ -163,7 +163,7 @@ class Board():
                 if (self.dict.lookup(crossword) == False):
                     return False;
                 else:
-                    move.crosswords.append(crossword);
+                    move.crosswords.append((crossword, 0));
 
         return True;
 
@@ -266,6 +266,7 @@ class Board():
         lin = move.pos[0];
         col = move.pos[1];
         index = 0;
+        extra = 0;
         for l in move.word:
 
             crossword = "";
@@ -277,8 +278,8 @@ class Board():
             else:
                 _pt = Piece.getLetterData(Piece, l)[0];
 
-                _multWord = 1;
-                _pts = 0;
+            _multWord = 1;
+            _pts = 0;
 
             index += 1;
 
@@ -295,26 +296,27 @@ class Board():
 
                     _lin += 1;
                     pedra = self.get(_lin, col);
+                    square = self.matrix[_lin][col];
                     while(pedra != ' '):
                         _lin += 1;
                         crossword += pedra;
+                        
+                        if((square.multiplier == "$") or (square.multiplier == "*")):
+                            _multWord = _multWord * 2;
+                            _pts = _pts + _pt;
+                        elif(square.multiplier == "-"):
+                            _pts = _pts + _pt * 2;
+                        elif(square.multiplier == "+"):
+                            _pts = _pts + _pt * 3;
+                        elif(square.multiplier == "@"):
+                            _multWord = _multWord * 3;
+                        else:
+                            _pts = _pts + _pt;
+
                         pedra = self.get(_lin, col);
+                        square = self.matrix[_lin][col];
 
                     self.matrix[lin][col].remove();
-
-                    square = self.matrix[lin][col];
-                    if((square.multiplier == "$") or (square.multiplier == "*")):
-                        _multWord = _multWord * 2;
-                        _pts = _pts + _pt;
-                    elif(square.multiplier == "-"):
-                        _pts = _pts + _pt * 2;
-                    elif(square.multiplier == "+"):
-                        _pts = _pts + _pt * 3;
-                    elif(square.multiplier == "@"):
-                        _multWord = _multWord * 3;
-                    else:
-                        _pts = _pts + _pt;
-
                     _pts = _pts * _multWord;
 
                 col += 1;
@@ -331,26 +333,27 @@ class Board():
 
                     _col += 1;
                     pedra = self.get(lin, _col);
+                    square = self.matrix[lin][_col];
                     while(pedra != ' '):
                         _col += 1;
                         crossword += pedra;
+
+                        if((square.multiplier == "$") or (square.multiplier == "*")):
+                            _multWord = _multWord * 2;
+                            _pts = _pts + _pt;
+                        elif(square.multiplier == "-"):
+                            _pts = _pts + _pt * 2;
+                        elif(square.multiplier == "+"):
+                            _pts = _pts + _pt * 3;
+                        elif(square.multiplier == "@"):
+                            _multWord = _multWord * 3;
+                        else:
+                            _pts = _pts + _pt;
+                            
                         pedra = self.get(lin, _col);
+                        square = self.matrix[lin][_col];
 
                     self.matrix[lin][col].remove();
-
-                    square = self.matrix[lin][col];
-                    if((square.multiplier == "$") or (square.multiplier == "*")):
-                        _multWord = _multWord * 2;
-                        _pts = _pts + _pt;
-                    elif(square.multiplier == "-"):
-                        _pts = _pts + _pt * 2;
-                    elif(square.multiplier == "+"):
-                        _pts = _pts + _pt * 3;
-                    elif(square.multiplier == "@"):
-                        _multWord = _multWord * 3;
-                    else:
-                        _pts = _pts + _pt;
-
                     _pts = _pts * _multWord;
 
                 lin += 1;
@@ -360,7 +363,10 @@ class Board():
                 if (self.dict.lookup(crossword) == False):
                     return False;
                 else:
-                    move.crosswords.append(crossword);
+                    # print(move.crosswords)
+                    # print(crossword)
+                    move.crosswords[extra] = (move.crosswords[extra][0], _pts);
+                    extra += 1;
                     pts = pts + _pts;
 
             index += 1;
@@ -387,7 +393,6 @@ class Board():
                 pt = Piece.getLetterData(Piece, l)[0];
 
             square = self.matrix[lin][col];
-            #print("Pt: " + str(pt) + " / " + square.multiplier + " / Row: " + str(square.pos[0]) + " / Col: " + str(square.pos[1]));
             if((square.multiplier == "$") or (square.multiplier == "*")):
                 multWord = multWord * 2;
                 pts = pts + pt;
@@ -408,7 +413,6 @@ class Board():
             index += 1;
 
         pts = pts * multWord;
-        #print(">PALAVRA: " + move.word + ". PTS: " + str(pts));
         return pts;
 
     def get(self, lin, col):
