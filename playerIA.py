@@ -37,8 +37,6 @@ class PlayerIA(Player):
         # self.debugAnchors();
 
         for anchor in self.anchors:
-            # print(anchor[0], end=' ')
-            # print(anchor[1])
 
             # Define ancora atual:
             self.anchor = (anchor[1].value, anchor[1]);
@@ -113,13 +111,14 @@ class PlayerIA(Player):
 
         if(square.isEmpty()):
 
-            # Se a palavra for final no dicionario e a proxima posicao no tabuleiro estiver vazia:
-            if(root.final == True) and (nextSquare is None or (nextSquare.isEmpty())):
-            #if(root.final == True):
+            # Cria uma jogada se a palavra estiver marcada como final:
+            if(root.final == True):
                 # Cria uma nova jogada:
                 self.generateMove(word, square);
 
             for l in root.edges:
+                # Define a proxima posicao no dawg:
+                newRoot = root.edges[l];
 
                 # Se a letra 'l' esta na mao do jogador:
                 if(self.hand[l].quantity > 0):
@@ -131,10 +130,7 @@ class PlayerIA(Player):
                     self.hand[l].quantity -= 1;
                     self.placedNew = True;
 
-                    # Atualiza a posicao no dawg:
-                    newRoot = root.edges[l];
-
-                    # Informa que foi colocada uma peca a direita:
+                    # Incrementa a quantidade de pecas a direita:
                     self.placedRight += 1;
 
                     # Continua a formar palavras a direita:
@@ -156,10 +152,7 @@ class PlayerIA(Player):
                     # Adiciona a peca em branco a lista:
                     self.brancos.append((l, len(word)));
 
-                    # Atualiza a posicao no dawg:
-                    newRoot = root.edges[l];
-
-                    # Informa que foi colocada uma peca a direita:
+                    # Incrementa a quantidade de pecas a direita:
                     self.placedRight += 1;
 
                     # Continua a formar palavras a direita:
@@ -189,14 +182,14 @@ class PlayerIA(Player):
         """ Faz a primeira jogada. """
 
         hand = self.hand;
-        square = self.board.matrix[7][7];
-        self.playDir = choice(['V', 'H']);
+        square = self.board.matrix[7][7];  # Deve utilizar como ancora o centro do tabuleiro.
+        self.playDir = choice(['V', 'H']); # Sorteia por fazer uma jogada horizontal ou vertical.
         
-        # Cria palavras com as pecas da mao do jogador
+        # Cria palavras com todas as pecas da mao do jogador
         # usando cada letra como ancora uma vez:
         size = len(hand);
         for i in range(size):
-            # Peg a peca 'i':
+            # Pega 'i'esima peca:
             (letter, piece) = list(hand.items())[i];
             hand[letter].quantity -= 1;
 
@@ -211,13 +204,13 @@ class PlayerIA(Player):
 
         # Faz a melhor jogada encontrada:
         if(self.bestMove is None):
-            self.nPass += 1;
-            return (self.piecesToChange(), None);
+            self.nPass += 1;                            # Incrementa a quantidade de turnos passados.
+            return (self.piecesToChange(), None);       # (Pedras p/ trocar, Jogada).
         else:
             self.board.insertWord(self.bestMove, self); # Adiciona a jogada na mesa.
-            self.addWord(self.bestMove); # Adiciona a palavra a lista de palavras formadas.
-            self.nPass = 0; # Reseta a contagem de turnos passados.
-            return ({}, self.bestMove);
+            self.addWord(self.bestMove);                # Adiciona a palavra a lista de palavras formadas.
+            self.nPass = 0;                             # Reseta a contagem de turnos passados.
+            return ({}, self.bestMove);                 # (Pedras p/ trocar, Jogada).
 
     def generateMove(self, word, square):
         """ Cria uma jogada.
@@ -229,7 +222,9 @@ class PlayerIA(Player):
         if(self.placedNew is False):
             return;
 
+        # Cria a jogada:
         if(self.playDir == "H"):
+            # Calcula a posicao no tabuleiro onde a palavra comeca:
             iniY = square.pos[1] - len(word);
             newMove = Move(word, (square.pos[0], iniY), "H");
         elif(self.playDir == "V"):
@@ -237,8 +232,11 @@ class PlayerIA(Player):
             iniX = square.pos[0] - len(word);
             newMove = Move(word, (iniX, square.pos[1]), "V");
 
-        # A jogada criada nao eh valida
+        # A jogada criada eh invalida:
         if(self.board.isValid(newMove, self) is False):
+            # print("# Jogada: ", end='')
+            # print(newMove, end='')
+            # print(" RECUSADA")
             return;
 
         # Informa os coringas utilizados se ouver:
@@ -281,7 +279,7 @@ class PlayerIA(Player):
                             square = self.board.getSquare(j, col);
 
                         # Chegou em outra palavra:
-                        if(square is not None):
+                        if(square is not None) and (j != lin - i + 1):
                             limite -= 1; # Da um espaco em branco de distancia.
 
                         if(limite > -1):
@@ -309,12 +307,11 @@ class PlayerIA(Player):
                             square = self.board.getSquare(lin, j);
 
                         # Chegou em outra palavra:
-                        if(square is not None):
+                        if(square is not None) and (j != (col - i + 1)):
                             limite -= 1; # Da um espaco em branco de distancia.
 
                         if(limite > -1):
                             self.anchors.append(("H", self.board.matrix[lin][col - i + 2], limite));
-                        #self.anchors.append(("H", self.board.matrix[lin][col]));
 
     def piecesToChange(self):
         """ Forma um dicionario de pecas para serem trocadas.
@@ -342,9 +339,6 @@ class PlayerIA(Player):
                     self.hand[l].quantity -= 1;
 
         return troca;
-
-    def isValid(self):
-        return True;
 
     def reset(self):
         self.anchors  = [];

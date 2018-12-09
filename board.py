@@ -9,25 +9,25 @@ from copy import deepcopy;
 
 class BNode():
     """ Uma posicao do tabuleiro. """
-    def __init__(self, multiplier, lin, col):
-        self.value = ' ';
-        self.empty = True;
-        self.multiplier = multiplier;
+    def __init__(self, multLabel, multiplier, lin, col):
+        self.value = ' ';                 # Caractere colocado no tabuleiro.
+        self.multiplier = multiplier;     # Multiplier de (letras, palavras).
+        self.multiplierLabel = multLabel; # Label exibida no tabuleiro.
         self.pos = (lin, col);
 
     def isEmpty(self):
-        return self.empty;
+        if self.value == ' ':
+            return True;
+        return False;
 
     def place(self, letter):
         self.value = letter;
-        self.empty = False;
 
     def remove(self):
         self.value = ' ';
-        self.empty = True;
 
     def __str__(self):
-        return "Value: " + str(self.value) + ". Mult: " + self.multiplier + ". (" + str(self.pos[0]) + ", " + str(self.pos[1]) + ").";
+        return "Value: " + str(self.value) + ". Mult: " + self.multiplierLabel + ". (" + str(self.pos[0]) + ", " + str(self.pos[1]) + ").";
 
 class Board():
     """ Mantem o estado atual do tabuleiro.
@@ -47,19 +47,25 @@ class Board():
                 lineList = line.split();      # Divide a string em uma lista.
                 nodeList = [];                # Linha de nodes.
                 for mult in lineList:         # Cria um node para cada coluna.
-                    multiplier = "1";
+                    multiplier = (1, 1);
+                    multLabel = "1";
                     if(mult == "DL"):         # DL: Dobra pontuacao da letra.
-                        multiplier = "-";
+                        multLabel  = "-";
+                        multiplier = (2, 1);
                     elif(mult == "TL"):       # TL: Triplica pontuacao da letra.
-                        multiplier = "+";
+                        multLabel = "+";
+                        multiplier = (3, 1);
                     elif(mult == "DP"):       # DP: Dobra pontuacao da palavra.
-                        multiplier = "*";
+                        multLabel = "*";
+                        multiplier = (1, 2);
                     elif(mult == "TP"):       # TP: Triplica pontuacao da palavra.
-                        multiplier = "@";
+                        multLabel = "@";
+                        multiplier = (1, 3);
                     elif(mult == "*"):        #  *: Pontuacao inicial.
-                        multiplier = "$";
+                        multLabel = "$"
+                        multiplier = (1, 2);
 
-                    nodeList.append(BNode(multiplier, i, j));
+                    nodeList.append(BNode(multLabel, multiplier, i, j));
                     j += 1;
                 j = 0;
                 i += 1;
@@ -74,13 +80,13 @@ class Board():
             3o) Checa se gera outras palavras cruzadas validas.
         """
 
-        # Se a palavra nao existir no dicionario
+        # 1o) Se a palavra nao existir no dicionario
         # ou possuir menos do que dois caracteres
         # a jogada eh invalida:
-        if((self.dict.lookup(move.word) is False) or (len(move.word) < 2)):
+        if((self.dict.lookup(move.word) == False) or (len(move.word) < 2)):
             return False;
 
-        # A nova jogada deve utilizar uma peca do tabuleiro:
+        # 2o) A nova jogada deve utilizar uma peca do tabuleiro:
         lin = move.pos[0];
         col = move.pos[1];
         utilizaAncora = False;
@@ -89,9 +95,6 @@ class Board():
             if(self.get(lin, col) == l):
                 utilizaAncora = True;
                 break;
-            # Tentou substituir uma pedra do tabuleiro:
-            elif(self.get(lin, col) != ' '):
-                return False;
 
             # Determina proxima posicao:
             if(move.dir == 'H'):
@@ -99,10 +102,11 @@ class Board():
             elif(move.dir == 'V'):
                 lin += 1;
 
-        if(utilizaAncora == False) and (self.get(7,7) != ' '):
+        # Nao utiliza ancora e nao eh a primeira jogada:
+        if(utilizaAncora == False) and (self.get(7, 7) != ' '):
             return False;
 
-        # A nova jogada nao deve criar outras palavras invalidas:
+        # 3o) A nova jogada nao deve criar outras palavras invalidas:
         lin = move.pos[0];
         col = move.pos[1];
 
@@ -112,16 +116,18 @@ class Board():
             empty = False;
 
             if(move.dir == "H"):
-
                 if(self.get(lin, col) == ' '):
-                    self.matrix[lin][col].place(l);
+                    # Coloca a letra atual no tabuleiro:
+                    self.getSquare(lin, col).place(l);
 
+                    # Procura o inicio da palavra:
                     _lin = lin;
                     pedra = self.get(_lin, col);
                     while(pedra != ' '):
                         _lin -= 1;
                         pedra = self.get(_lin, col);
 
+                    # Concatena as pedras da palavra:
                     _lin += 1;
                     pedra = self.get(_lin, col);
                     while(pedra != ' '):
@@ -129,22 +135,24 @@ class Board():
                         crossword += pedra;
                         pedra = self.get(_lin, col);
 
-                    #print("#" + move.word + " -> Formou Vertical: " + crossword);
+                    # Retira a letra atual do tabuleiro:
+                    self.getSquare(lin, col).remove();
 
-                    self.matrix[lin][col].remove();
-
+                # Checa a proxima posicao:
                 col += 1;
             elif(move.dir == "V"):
-
                 if(self.get(lin, col) == ' '):
-                    self.matrix[lin][col].place(l);
+                    # Coloca a letra atual no tabuleiro:
+                    self.getSquare(lin, col).place(l);
 
+                    # Procura o inicio da palavra:
                     _col = col;
                     pedra = self.get(lin, _col);
                     while(pedra != ' '):
                         _col -= 1;
                         pedra = self.get(lin, _col);
 
+                    # Concatena as pedras da palavra:
                     _col += 1;
                     pedra = self.get(lin, _col);
                     while(pedra != ' '):
@@ -152,18 +160,19 @@ class Board():
                         crossword += pedra;
                         pedra = self.get(lin, _col);
 
-                    #print("#" + move.word + " -> Formou Horizontal: " + crossword);
+                    # Retira a letra atual do tabuleiro:
+                    self.getSquare(lin, col).remove();
 
-                    self.matrix[lin][col].remove();
-
+                # Checa a proxima posicao:
                 lin += 1;
 
             # Crossword formada nao esta no dicionario:
+            # Ignora palavras de tamanho 2.
             if(len(crossword) > 2):
-                if (self.dict.lookup(crossword) == False):
-                    return False;
-                else:
+                if (self.dict.lookup(crossword)):
                     move.crosswords.append((crossword, 0));
+                else:
+                    return False;
 
         return True;
 
@@ -174,7 +183,7 @@ class Board():
 
         index = 0;
         for l in move.word:
-            if(self.matrix[lin][col].isEmpty()):
+            if(self.getSquare(lin, col).isEmpty()):
                 # Checa se uma pedra em branco foi utilizada:
                 if(index in move.brancos):
                     player.hand['#'].quantity -= 1;
@@ -184,7 +193,7 @@ class Board():
             index += 1;
 
             # Coloca a letra na posicao:
-            self.matrix[lin][col].place(l);
+            self.getSquare(lin, col).place(l);
 
             # Posicao para a proxima peca:
             if(move.dir == "H"):
@@ -202,7 +211,7 @@ class Board():
         for l in move.word:
     
             # Coloca a letra na posicao:
-            self.matrix[lin][col].place(l);
+            self.getSquare(lin, col).place(l);
 
             # Posicao para a proxima peca:
             if(move.dir == "H"):
@@ -218,8 +227,8 @@ class Board():
 
         for l in move.word:
     
-            # Coloca a letra na posicao:
-            self.matrix[lin][col].remove();
+            # Remove a letra da posicao:
+            self.getSquare(lin, col).remove();
 
             # Posicao para a proxima peca:
             if(move.dir == "H"):
@@ -242,18 +251,9 @@ class Board():
             else:
                 pt = Piece.getLetterData(Piece, l)[0];
 
-            square = self.matrix[lin][col];
-            if((square.multiplier == "$") or (square.multiplier == "*")):
-                multWord = multWord * 2;
-                pts = pts + pt;
-            elif(square.multiplier == "-"):
-                pts = pts + pt * 2;
-            elif(square.multiplier == "+"):
-                pts = pts + pt * 3;
-            elif(square.multiplier == "@"):
-                multWord = multWord * 3;
-            else:
-                pts = pts + pt;
+            square = self.getSquare(lin, col);
+            multWord = multWord * square.multiplier[1];
+            pts = pts + pt * square.multiplier[0];
 
             if(move.dir == 'H'):
                 col += 1;
@@ -262,11 +262,14 @@ class Board():
 
             index += 1;
 
+        pts = pts * multWord;
+        move._value = pts;
+
         # Calcula pontuacao das demais:
         lin = move.pos[0];
         col = move.pos[1];
-        index = 0;
-        extra = 0;
+        index = 0; # Index dos coringas utilizados na palavra.
+        extra = 0; # Index das palavras a mais formadas pela jogada.
         for l in move.word:
 
             crossword = "";
@@ -278,189 +281,97 @@ class Board():
             else:
                 _pt = Piece.getLetterData(Piece, l)[0];
 
-            _multWord = 1;
-            _pts = 0;
-
-            index += 1;
+            index += 1;     # Incrementa o index dos coringas.
+            _multWord = 1;  # Multiplicador de palavras das palavras adicionais.
+            _pts = 0;       # Pontuacao das palavras adicionais.
 
             if(move.dir == "H"):
-
                 if(self.get(lin, col) == ' '):
-                    self.matrix[lin][col].place(l);
+                    # Coloca a letra atual no tabuleiro:
+                    self.getSquare(lin, col).place(l);
 
+                    # Procura o inicio da palavra:
                     _lin = lin;
                     pedra = self.get(_lin, col);
                     while(pedra != ' '):
                         _lin -= 1;
                         pedra = self.get(_lin, col);
 
+                    # Concatena as pedras da palavra e calcula a pontuacao:
                     _lin += 1;
-                    pedra = self.get(_lin, col);
-                    square = self.matrix[_lin][col];
-                    while(pedra != ' '):
+                    square = self.getSquare(_lin, col);
+                    while(square.value != ' '):
                         _lin += 1;
-                        crossword += pedra;
+                        crossword += square.value;
                         
-                        if((square.multiplier == "$") or (square.multiplier == "*")):
-                            _multWord = _multWord * 2;
-                            _pts = _pts + _pt;
-                        elif(square.multiplier == "-"):
-                            _pts = _pts + _pt * 2;
-                        elif(square.multiplier == "+"):
-                            _pts = _pts + _pt * 3;
-                        elif(square.multiplier == "@"):
-                            _multWord = _multWord * 3;
-                        else:
-                            _pts = _pts + _pt;
+                        _multWord = _multWord * square.multiplier[1];
+                        _pts = _pts + _pt * square.multiplier[0];
 
-                        pedra = self.get(_lin, col);
-                        square = self.matrix[_lin][col];
+                        square = self.getSquare(_lin, col);
 
-                    self.matrix[lin][col].remove();
+                    # Retira a letra atual do tabuleiro:
+                    self.getSquare(lin, col).remove();
                     _pts = _pts * _multWord;
 
+                # Checa a proxima posicao:
                 col += 1;
             elif(move.dir == "V"):
-
                 if(self.get(lin, col) == ' '):
-                    self.matrix[lin][col].place(l);
+                    # Coloca a letra atual no tabuleiro:
+                    self.getSquare(lin, col).place(l);
 
+                    # Procura o inicio da palavra:
                     _col = col;
                     pedra = self.get(lin, _col);
                     while(pedra != ' '):
                         _col -= 1;
                         pedra = self.get(lin, _col);
 
+                    # Concatena as pedras da palavra e calcula a pontuacao:
                     _col += 1;
-                    pedra = self.get(lin, _col);
-                    square = self.matrix[lin][_col];
-                    while(pedra != ' '):
+                    square = self.getSquare(lin, _col);
+                    while(square.value != ' '):
                         _col += 1;
-                        crossword += pedra;
+                        crossword += square.value;
 
-                        if((square.multiplier == "$") or (square.multiplier == "*")):
-                            _multWord = _multWord * 2;
-                            _pts = _pts + _pt;
-                        elif(square.multiplier == "-"):
-                            _pts = _pts + _pt * 2;
-                        elif(square.multiplier == "+"):
-                            _pts = _pts + _pt * 3;
-                        elif(square.multiplier == "@"):
-                            _multWord = _multWord * 3;
-                        else:
-                            _pts = _pts + _pt;
-                            
-                        pedra = self.get(lin, _col);
-                        square = self.matrix[lin][_col];
+                        _multWord = _multWord * square.multiplier[1];
+                        _pts = _pts + _pt * square.multiplier[0];
 
-                    self.matrix[lin][col].remove();
+                        square = self.getSquare(lin, _col);
+
+                    # Retira a letra atual do tabuleiro:
+                    self.getSquare(lin, col).remove();
                     _pts = _pts * _multWord;
 
+                # Checa a proxima posicao:
                 lin += 1;
 
             # Crossword formada nao esta no dicionario:
+            # Ignora palavras de tamanho 2.
             if(len(crossword) > 2):
-                if (self.dict.lookup(crossword) == False):
-                    return False;
-                else:
-                    # print(move.crosswords)
-                    # print(crossword)
+                if (self.dict.lookup(crossword)):
+                    # Se existir atualiza a pontuacao das crosswords:
                     move.crosswords[extra] = (move.crosswords[extra][0], _pts);
                     extra += 1;
+
+                    # Da pontuacao total:
                     pts = pts + _pts;
+                else:
+                    return False;
 
-            index += 1;
-
-        pts = pts * multWord;
-
-        return pts;
-
-    def calcMovePointsExtraOldie(self, move):
-        """ Calcula e define a quantidade de pontos
-            de uma jogada valida 'move'.
-        """
-        lin = move.pos[0];
-        col = move.pos[1];
-        pts = 0;
-        multWord = 1;
-        index = 0;
-
-        for l in move.word:
-            # Pega dados da pedra:
-            if(index in move.brancos):
-                pt = Piece.getLetterData('#', l)[0];
-            else:
-                pt = Piece.getLetterData(Piece, l)[0];
-
-            square = self.matrix[lin][col];
-            if((square.multiplier == "$") or (square.multiplier == "*")):
-                multWord = multWord * 2;
-                pts = pts + pt;
-            elif(square.multiplier == "-"):
-                pts = pts + pt * 2;
-            elif(square.multiplier == "+"):
-                pts = pts + pt * 3;
-            elif(square.multiplier == "@"):
-                multWord = multWord * 3;
-            else:
-                pts = pts + pt;
-
-            if(move.dir == 'H'):
-                col += 1;
-            elif(move.dir == 'V'):
-                lin += 1;
-
-            index += 1;
-
-        pts = pts * multWord;
         return pts;
 
     def get(self, lin, col):
+        # Garante que recebeu linha e coluna validos:
         if((lin < 0) or (lin > 14) or (col < 0) or (col > 14)):
             return ' ';
         return self.matrix[lin][col].value;
 
     def getSquare(self, lin, col):
+        # Garante que recebeu linha e coluna validos:
         if((lin < 0) or (lin > 14) or (col < 0) or (col > 14)):
             return None;
         return self.matrix[lin][col];
-
-    def __str__(self):
-        # Exibe index da coluna:
-        board = "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
-        board = board + "    - - - - - - - - - - - - - - -\n";
-        for i in range(len(self.matrix)):
-
-            lineIndex = str(i);
-
-            # Exibe index da linha:
-            if(i == 10):
-                lineIndex = "A";
-            elif(i == 11):
-                lineIndex = "B";
-            elif(i == 12):
-                lineIndex = "C";
-            elif(i == 13):
-                lineIndex = "D";
-            elif(i == 14):
-                lineIndex = "E";
-
-            board = board + lineIndex + "| ";
-
-            for j in range(len(self.matrix[0])):
-                node = self.matrix[i][j];
-                if(node.value == ' ') and (node.multiplier != '1'):
-                    board = board + " " + node.multiplier;
-                else:
-                    board = board + " " + node.value.upper();
-            
-            # Exibe index da linha:
-            board = board + " |" + lineIndex + "\n";
-
-        board = board + "    - - - - - - - - - - - - - - -\n";
-        board = board + "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
-            
-        return board;
 
     def show(self, p1, p2):
         palavrasP1 = deepcopy(p1.words);
@@ -489,8 +400,8 @@ class Board():
 
             for j in range(len(self.matrix[0])):
                 node = self.matrix[i][j];
-                if(node.value == ' ') and (node.multiplier != '1'):
-                    board = board + " " + node.multiplier;
+                if(node.value == ' ') and (node.multiplierLabel != '1'):
+                    board = board + " " + node.multiplierLabel;
                 else:
                     board = board + " " + node.value.upper();
             

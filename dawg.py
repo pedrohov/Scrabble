@@ -37,7 +37,6 @@ class Dawg:
 
     def insert(self, word):
         """ Adiciona uma nova palavra ao DAWG. """
-
         node = self.root;
         for letter in word:
             if(letter in node.edges):

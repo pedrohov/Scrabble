@@ -9,18 +9,19 @@ class Move():
         self.word   = word;      # Palavra formada.
         self.pos    = pos;       # Comeco da palavra no tabuleiro (lin, col).
         self.dir    = direction; # Direcao em que a palavra foi formada (esq -> dir, ou cima -> baixo).
-        self.value  = 0;         # Valor da jogada.
+        self.value  = 0;         # Valor total da jogada.
+        self._value = 0;         # Valor da palavra colocada.
 
         self.crosswords = [];    # Palavras a mais formadas pela jogada.
 
         self.brancos = {};       # Informacao das pecas em branco utilizadas na jogada.
 
     def getWords(self):
-        res = self.word;
+        res = self.word + '(' + str(self._value) +')';
 
         if(len(self.crosswords) > 0):
             for crossword in self.crosswords:
-                res += ' ' + crossword[0];
+                res += ' ' + crossword[0] + '(' + str(crossword[1]) + ')';
 
             res = '[' + ", ".join(res.split(' ')) + ']';
             
