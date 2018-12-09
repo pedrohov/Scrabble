@@ -1,6 +1,6 @@
 # Scrabble
 
-Jogo de palavras cruzadas *Scrabble* que implementa rotinas para a geração de palavras dado o estado do tabuleiro.
+Jogo de palavras cruzadas *Scrabble* que implementa rotinas para a geração de palavras.
 
 O computador utiliza a estrutura *DAWG* para realizar buscas rápidas no dicionário, e forma palavras utilizando o método de backtracking proposto em [The World's Fastest Scrabble Program](https://www.cs.cmu.edu/afs/cs/academic/class/15451-s06/www/lectures/scrabble.pdf).
 
