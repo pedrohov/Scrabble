@@ -300,7 +300,7 @@ class Board():
                     # Concatena as pedras da palavra e calcula a pontuacao:
                     _lin += 1;
                     square = self.getSquare(_lin, col);
-                    while(square.value != ' '):
+                    while(square is not None) and (square.value != ' '):
                         _lin += 1;
                         crossword += square.value;
                         
@@ -330,7 +330,7 @@ class Board():
                     # Concatena as pedras da palavra e calcula a pontuacao:
                     _col += 1;
                     square = self.getSquare(lin, _col);
-                    while(square.value != ' '):
+                    while(square is not None) and (square.value != ' '):
                         _col += 1;
                         crossword += square.value;
 
@@ -348,16 +348,13 @@ class Board():
 
             # Crossword formada nao esta no dicionario:
             # Ignora palavras de tamanho 2.
-            if(len(crossword) > 2):
-                if (self.dict.lookup(crossword)):
-                    # Se existir atualiza a pontuacao das crosswords:
-                    move.crosswords[extra] = (move.crosswords[extra][0], _pts);
-                    extra += 1;
+            if(len(crossword) > 2) and (self.dict.lookup(crossword)):
+                # Se existir atualiza a pontuacao das crosswords:
+                move.crosswords[extra] = (move.crosswords[extra][0], _pts);
+                extra += 1;
 
-                    # Da pontuacao total:
-                    pts = pts + _pts;
-                else:
-                    return False;
+                # Da pontuacao total:
+                pts = pts + _pts;
 
         return pts;
 

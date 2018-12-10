@@ -144,7 +144,13 @@ class Player():
         ancora = False;
 
         for l in word:
-            if(self.board.matrix[lin][col].isEmpty()):
+
+            square = self.board.getSquare(lin, col);
+            if(square is None):
+                print("A jogada sai do limite do tabuleiro.");
+                return None;
+
+            if(square.isEmpty()):
 
                 # Retira peca da mao:
                 if(mao[l].quantity > 0):
@@ -161,7 +167,7 @@ class Player():
                     return None;
 
             # Jogador tentou substituir pedra do tabuleiro.
-            elif(self.board.get(lin, col) != l):
+            elif(square.value != l):
                 print("Nao e possivel substituir palavras do tabuleiro.");
                 return None; 
 

@@ -15,7 +15,6 @@ class PlayerIA(Player):
         self.bestMove = None;    # Jogada com maior pontuacao.
         self.playDir  = None;    # Direcao da jogada (H/V).
         self.placedNew = False;  # Informa se uma nova peca foi inserida na palavra.
-        self.placedRight = 0;    # Informa a quantidade de pecas colocadas apos o ponto ancora.
 
         # Lista de tuplas que informa se foram utilizadas pedras
         # em branco para formar a jogada e a posicao da pedra.
@@ -34,7 +33,7 @@ class PlayerIA(Player):
 
         # Determina todos os pontos ancora:
         self.getAnchors();
-        # self.debugAnchors();
+        #self.debugAnchors();
 
         for anchor in self.anchors:
 
@@ -104,9 +103,9 @@ class PlayerIA(Player):
 
         # Define a proxima posicao no tabuleiro:
         nextSquare = None;
-        if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
+        if((self.playDir == "V") and ((square.pos[0] + 1) < 15)):
             nextSquare = self.board.matrix[square.pos[0] + 1][square.pos[1]];
-        elif((self.playDir == "H") and (square.pos[1] + 1 < 15)):
+        elif((self.playDir == "H") and ((square.pos[1] + 1) < 15)):
             nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
 
         if(square.isEmpty()):
@@ -130,14 +129,10 @@ class PlayerIA(Player):
                     self.hand[l].quantity -= 1;
                     self.placedNew = True;
 
-                    # Incrementa a quantidade de pecas a direita:
-                    self.placedRight += 1;
-
                     # Continua a formar palavras a direita:
                     self.extendRight(word + l, newRoot, nextSquare);
                     self.hand[l].quantity += 1;
                     self.placedNew = False;
-                    self.placedRight -= 1;
 
                 # Trata pedras em branco na mao:
                 elif(self.hand['#'].quantity > 0):
@@ -152,9 +147,6 @@ class PlayerIA(Player):
                     # Adiciona a peca em branco a lista:
                     self.brancos.append((l, len(word)));
 
-                    # Incrementa a quantidade de pecas a direita:
-                    self.placedRight += 1;
-
                     # Continua a formar palavras a direita:
                     self.extendRight(word + l, newRoot, nextSquare);
 
@@ -162,20 +154,15 @@ class PlayerIA(Player):
                     self.brancos.pop();
                     self.hand['#'].quantity += 1;
                     self.placedNew = False;
-                    self.placedRight -= 1;
         else:
             l = square.value;
             if(l in root.edges):
                 if(self.playDir == "V"):
                     newRoot = root.edges[l];
-                    self.placedRight += 1;
                     self.extendRight(word + l, newRoot, nextSquare);
-                    self.placedRight -= 1;
                 elif(self.playDir == "H"):
                     newRoot = root.edges[l];
-                    self.placedRight += 1;
                     self.extendRight(word + l, newRoot, nextSquare);
-                    self.placedRight -= 1;
         return;
 
     def firstPlay(self):
@@ -235,9 +222,6 @@ class PlayerIA(Player):
 
         # A jogada criada eh invalida:
         if(self.board.isValid(newMove, self) is False):
-            # print("# Jogada: ", end='')
-            # print(newMove, end='')
-            # print(" RECUSADA")
             return;
 
         # Informa os coringas utilizados se ouver:
@@ -347,7 +331,6 @@ class PlayerIA(Player):
         self.bestMove = None;
         self.playDir  = None;
         self.placedNew   = False;
-        self.placedRight = 0;
         self.brancos  = [];
 
     def debugAnchors(self):
