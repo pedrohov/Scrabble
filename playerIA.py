@@ -74,14 +74,14 @@ class PlayerIA(Player):
                     self.extendRight(word, root, square);
 
                 # Demais pedras:
-                elif(l in self.hand) and (self.hand[l].quantity > 0):
+                elif(self.hand[l].quantity > 0):
                     self.hand[l].quantity -= 1;
                     newRoot = root.edges[l];
                     self.leftPart(word + l, newRoot, limit - 1, square);
                     self.hand[l].quantity += 1;
 
                 # Trata pedras em branco na mao:
-                elif('#' in self.hand) and (self.hand['#'].quantity > 0):
+                elif(self.hand['#'].quantity > 0):
                     self.hand['#'].quantity -= 1;
                     newRoot = root.edges[l];
                     
@@ -98,7 +98,7 @@ class PlayerIA(Player):
 
     def extendRight(self, word, root, square):
         """ Forma sufixos para um dado prefixo 'word'. 
-            Poda palavra formada cria-se uma nova jogada,
+            Para cada palavra formada cria-se uma nova jogada,
             mantendo a que garantir mais pontos.
         """
 
@@ -166,12 +166,12 @@ class PlayerIA(Player):
         else:
             l = square.value;
             if(l in root.edges):
-                if((self.playDir == "V") and (square.pos[0] + 1 < 15)):
+                if(self.playDir == "V"):
                     newRoot = root.edges[l];
                     self.placedRight += 1;
                     self.extendRight(word + l, newRoot, nextSquare);
                     self.placedRight -= 1;
-                elif((self.playDir == "H") and (square.pos[1] + 1 < 15)):
+                elif(self.playDir == "H"):
                     newRoot = root.edges[l];
                     self.placedRight += 1;
                     self.extendRight(word + l, newRoot, nextSquare);
@@ -187,20 +187,21 @@ class PlayerIA(Player):
         
         # Cria palavras com todas as pecas da mao do jogador
         # usando cada letra como ancora uma vez:
-        size = len(hand);
-        for i in range(size):
+        for i in range(len(hand)):
             # Pega 'i'esima peca:
             (letter, piece) = list(hand.items())[i];
-            hand[letter].quantity -= 1;
 
-            # Define como ancora:
-            self.anchor = (letter, square);
+            if(piece.quantity > 0):
+	            hand[letter].quantity -= 1;
 
-            # Forma palavras:
-            self.leftPart("", self.dict, 7, square);
+	            # Define como ancora:
+	            self.anchor = (letter, square);
 
-            # Devolve a peca:
-            hand[letter].quantity += 1;
+	            # Forma palavras:
+	            self.leftPart("", self.dict, 7, square);
+
+	            # Devolve a peca:
+	            hand[letter].quantity += 1;
 
         # Faz a melhor jogada encontrada:
         if(self.bestMove is None):
