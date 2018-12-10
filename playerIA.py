@@ -115,15 +115,15 @@ class PlayerIA(Player):
                 # Cria uma nova jogada:
                 self.generateMove(word, square);
 
+            if(nextSquare is None):
+                return;
+
             for l in root.edges:
                 # Define a proxima posicao no dawg:
                 newRoot = root.edges[l];
 
                 # Se a letra 'l' esta na mao do jogador:
                 if(self.hand[l].quantity > 0):
-                    
-                    if(nextSquare is None):
-                        return;
 
                     # Remove a peca 'l' da mao do jogador:
                     self.hand[l].quantity -= 1;
@@ -137,9 +137,6 @@ class PlayerIA(Player):
                 # Trata pedras em branco na mao:
                 elif(self.hand['#'].quantity > 0):
                     
-                    if(nextSquare is None):
-                        return;
-
                     # Remove a peca 'l' da mao do jogador:
                     self.hand['#'].quantity -= 1;
                     self.placedNew = True;
@@ -224,7 +221,7 @@ class PlayerIA(Player):
         if(self.board.isValid(newMove, self) is False):
             return;
 
-        # Informa os coringas utilizados se ouver:
+        # Informa os coringas utilizados se houver:
         newMove.parseBrancos(self.brancos);
 
         # Calcula a pontuacao da jogada:
