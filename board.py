@@ -377,7 +377,7 @@ class Board():
 
         board = "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
         board = board + "    - - - - - - - - - - - - - - -\n";
-        for i in range(len(self.matrix)):
+        for i in range(len(self.matrix) - 1):
 
             lineIndex = str(i);
 
@@ -395,7 +395,7 @@ class Board():
 
             board = board + lineIndex + "| ";
 
-            for j in range(len(self.matrix[0])):
+            for j in range(len(self.matrix[0]) - 1):
                 node = self.matrix[i][j];
                 if(node.value == ' ') and (node.multiplierLabel != '1'):
                     board = board + " " + node.multiplierLabel;

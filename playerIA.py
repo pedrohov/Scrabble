@@ -107,9 +107,9 @@ class PlayerIA(Player):
 
         # Define a proxima posicao no tabuleiro:
         nextSquare = None;
-        if((self.playDir == "V") and ((square.pos[0] + 1) < 15)):
+        if((self.playDir == "V") and ((square.pos[0] + 1) <= 15)):
             nextSquare = self.board.matrix[square.pos[0] + 1][square.pos[1]];
-        elif((self.playDir == "H") and ((square.pos[1] + 1) < 15)):
+        elif((self.playDir == "H") and ((square.pos[1] + 1) <= 15)):
             nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
 
         if(square.isEmpty()):
@@ -218,11 +218,14 @@ class PlayerIA(Player):
             iniX = square.pos[0] - len(word);
             newMove = Move(word, (iniX, square.pos[1]), "V");
 
+        # print("Move: " + str(newMove),end='')
+
         # A jogada criada eh invalida:
         if(self.board.isValid(newMove, self) is False):
-            #print("Move: " + str(newMove)+ " INVALIDA")
+            # print(" INVALIDA ")
             return;
 
+        # print(" VALIDA")
         # Informa os coringas utilizados se houver:
         newMove.parseBrancos(self.brancos);
 
