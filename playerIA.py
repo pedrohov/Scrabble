@@ -33,7 +33,7 @@ class PlayerIA(Player):
 
         # Determina todos os pontos ancora:
         self.getAnchors();
-        #self.debugAnchors();
+        # self.debugAnchors();
 
         for anchor in self.anchors:
 
@@ -101,6 +101,10 @@ class PlayerIA(Player):
             mantendo a que garantir mais pontos.
         """
 
+        # Posicao atual esta fora do tabuleiro:
+        if(square is None):
+            return;
+
         # Define a proxima posicao no tabuleiro:
         nextSquare = None;
         if((self.playDir == "V") and ((square.pos[0] + 1) < 15)):
@@ -114,9 +118,6 @@ class PlayerIA(Player):
             if(root.final == True):
                 # Cria uma nova jogada:
                 self.generateMove(word, square);
-
-            if(nextSquare is None):
-                return;
 
             for l in root.edges:
                 # Define a proxima posicao no dawg:
@@ -219,6 +220,7 @@ class PlayerIA(Player):
 
         # A jogada criada eh invalida:
         if(self.board.isValid(newMove, self) is False):
+            #print("Move: " + str(newMove)+ " INVALIDA")
             return;
 
         # Informa os coringas utilizados se houver:
@@ -244,15 +246,8 @@ class PlayerIA(Player):
                     # Se a posicao acima estiver vazia, marca esta como ancora:
                     if((self.board.matrix[lin - 1][col].isEmpty()) and (self.board.matrix[lin][col].isEmpty() == False)):
 
-                        # Enquanto houver pedras acima do ponto ancora, passe a ancora para cima:
-                        i = 2;
-                        square = self.board.matrix[lin - i][col];
-                        while(square.isEmpty() == False):
-                            i += 1;
-                            square = self.board.matrix[lin - i][col];
-
                         # Determina o limite do prefixo:
-                        j = lin - i + 1;
+                        j = lin - 1;
                         limite = 0;
                         square = self.board.getSquare(j, col);
                         while(square is not None) and (square.isEmpty()):
@@ -261,26 +256,19 @@ class PlayerIA(Player):
                             square = self.board.getSquare(j, col);
 
                         # Chegou em outra palavra:
-                        if(square is not None) and (j != lin - i + 1):
+                        if(square is not None) and (j != lin - 1):
                             limite -= 1; # Da um espaco em branco de distancia.
 
                         if(limite > -1):
-                            self.anchors.append(("V", self.board.matrix[lin - i + 2][col], limite));
+                            self.anchors.append(("V", self.board.matrix[lin][col], limite));
 
                 # Se a coluna for valida:
                 if((col >= 0) and (col < 15)):
                     # Se a posicao a esquerda estiver vazia, marca esta como ancora:
                     if((self.board.matrix[lin][col - 1].isEmpty()) and (self.board.matrix[lin][col].isEmpty() == False)):
 
-                        # Enquanto houver pedras acima do ponto ancora, passe a ancora para cima:
-                        i = 2;
-                        square = self.board.matrix[lin][col - i];
-                        while(square.isEmpty() == False):
-                            i += 1;
-                            square = self.board.matrix[lin][col - i];
-
                         # Determina o limite do prefixo:
-                        j = col - i + 1;
+                        j = col - 1;
                         limite = 0;
                         square = self.board.getSquare(lin, j);
                         while(square is not None) and (square.isEmpty()):
@@ -289,11 +277,11 @@ class PlayerIA(Player):
                             square = self.board.getSquare(lin, j);
 
                         # Chegou em outra palavra:
-                        if(square is not None) and (j != (col - i + 1)):
+                        if(square is not None) and (j != (col - 1)):
                             limite -= 1; # Da um espaco em branco de distancia.
 
                         if(limite > -1):
-                            self.anchors.append(("H", self.board.matrix[lin][col - i + 2], limite));
+                            self.anchors.append(("H", self.board.matrix[lin][col], limite));
 
     def piecesToChange(self):
         """ Forma um dicionario de pecas para serem trocadas.

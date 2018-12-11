@@ -238,7 +238,7 @@ class Board():
 
     def calcMovePoints(self, move):
         lin = move.pos[0];
-        col = move.pos[1];
+        col = move.pos[1];	
         pts = 0;
         multWord = 1;
         index = 0;
