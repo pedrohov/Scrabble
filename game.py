@@ -67,14 +67,14 @@ class Game():
             # Mantem a mao do jogador com 7 pecas:
             self.fillHand(self.turn);
 
-            #print(self.turn.debugHand());
-            #print(self.pieces)
-
             # Passa o turno do jogador atual:
             self.changeTurn();
 
             # Checa se o jogo chegou ao fim (ambos os jogadores passaram 2x):
-            self.isGameOver();
+            gameover = self.isGameOver();
+            if(gameover):
+                print("Fim do jogo.");
+                return;
 
     def fillHand(self, player):
         """ Sorteia uma mao inicial e a retorna como dicionario de Pieces."""
@@ -186,12 +186,13 @@ class Game():
             # Um jogador ficar sem letras, ou os dois jogadores passarem duas vezes:
             if((self.player1.handSize() == 0) or (self.player2.handSize() == 0) or
               ((self.player1.nPass >= 2) and (self.player2.nPass >= 2))):
-                print("Fim do jogo.");
-                exit();
+                return True;
+
         # Se houverem 6 turnos sem jogadas:
         elif((self.player1.nPass >= 6) and (self.player2.nPass >= 6)):
-                print("Fim do jogo.");
-                exit();
+                return True;
+
+        return False;
 
 if __name__ == "__main__":
     jogo = Game("board.txt", "dict.dawg");

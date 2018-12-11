@@ -112,7 +112,6 @@ class PlayerIA(Player):
             nextSquare = self.board.matrix[square.pos[0]][square.pos[1] + 1];
 
         if(square.isEmpty()):
-
             # Cria uma jogada se a palavra estiver marcada como final:
             if(root.final == True):
                 # Cria uma nova jogada:
@@ -154,12 +153,9 @@ class PlayerIA(Player):
         else:
             l = square.value;
             if(l in root.edges):
-                if(self.playDir == "V"):
-                    newRoot = root.edges[l];
-                    self.extendRight(word + l, newRoot, nextSquare);
-                elif(self.playDir == "H"):
-                    newRoot = root.edges[l];
-                    self.extendRight(word + l, newRoot, nextSquare);
+                newRoot = root.edges[l];
+                self.extendRight(word + l, newRoot, nextSquare);
+
         return;
 
     def firstPlay(self):
@@ -217,14 +213,10 @@ class PlayerIA(Player):
             iniX = square.pos[0] - len(word);
             newMove = Move(word, (iniX, square.pos[1]), "V");
 
-        # print("Move: " + str(newMove),end='')
-
         # A jogada criada eh invalida:
         if(self.board.isValid(newMove, self) is False):
-            # print(" INVALIDA ")
             return;
 
-        # print(" VALIDA")
         # Informa os coringas utilizados se houver:
         newMove.parseBrancos(self.brancos);
 

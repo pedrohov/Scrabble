@@ -380,7 +380,7 @@ class Board():
     def show(self, p1, p2):
         palavrasP1 = deepcopy(p1.words);
         palavrasP2 = deepcopy(p2.words);
-        maxchar = 35;
+        maxchar = 40;
 
         board = "    0 1 2 3 4 5 6 7 8 9 A B C D E\n";
         board = board + "    - - - - - - - - - - - - - - -\n";
