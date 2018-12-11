@@ -67,9 +67,16 @@ class Board():
 
                     nodeList.append(BNode(multLabel, multiplier, i, j));
                     j += 1;
+                nodeList.append(BNode('1', (1, 1), i, j));
                 j = 0;
                 i += 1;
                 self.matrix.append(nodeList);       # Adiciona linha ao tabuleiro.
+
+            nodeList = [];
+            for j in range(len(self.matrix[0])):
+                nodeList.append(BNode('1', (1, 1), i, j));
+
+            self.matrix.append(nodeList);
 
     def isValid(self, move, player):
         """ Checa se uma nova pedra colocada no tabuleiro
