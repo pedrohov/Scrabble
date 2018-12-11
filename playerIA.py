@@ -32,7 +32,7 @@ class PlayerIA(Player):
             return self.firstPlay();
 
         # Determina todos os pontos ancora:
-        self.getAnchors();
+        self.anchors = self.getAnchors();
         # self.debugAnchors();
 
         for anchor in self.anchors:
@@ -238,6 +238,8 @@ class PlayerIA(Player):
             todas as posicoes preenchidas no tabuleiro
             que possuirem uma posicao vazia adjacente. 
         """
+        anchors = [];
+
         for lin in range(len(self.board.matrix)):
             for col in range(len(self.board.matrix[lin])):
                 
@@ -260,7 +262,7 @@ class PlayerIA(Player):
                             limite -= 1; # Da um espaco em branco de distancia.
 
                         if(limite > -1):
-                            self.anchors.append(("V", self.board.matrix[lin][col], limite));
+                            anchors.append(("V", self.board.matrix[lin][col], limite));
 
                 # Se a coluna for valida:
                 if((col >= 0) and (col < 15)):
@@ -281,7 +283,9 @@ class PlayerIA(Player):
                             limite -= 1; # Da um espaco em branco de distancia.
 
                         if(limite > -1):
-                            self.anchors.append(("H", self.board.matrix[lin][col], limite));
+                            anchors.append(("H", self.board.matrix[lin][col], limite));
+
+        return anchors;
 
     def piecesToChange(self):
         """ Forma um dicionario de pecas para serem trocadas.
