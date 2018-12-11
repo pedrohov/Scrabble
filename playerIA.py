@@ -63,17 +63,16 @@ class PlayerIA(Player):
             tenta encontrar as palavras correspondentes.
         """
 
+        # Para cada prefixo formado, cria sufixos:
+        self.extendRight(word, root, square);
+
         # Se houver espaco a esquerda:
         if(limit > 0):
             # Para cada letra possivel:
             for l in root.edges:
 
-                # Se a letra for a ancora, estende para a direita:
-                if(l == self.anchor[0]):
-                    self.extendRight(word, root, square);
-
                 # Demais pedras:
-                elif(self.hand[l].quantity > 0):
+                if(self.hand[l].quantity > 0):
                     self.hand[l].quantity -= 1;
                     newRoot = root.edges[l];
                     self.leftPart(word + l, newRoot, limit - 1, square);
