@@ -240,6 +240,7 @@ class PlayerIA(Player):
         """
         anchors = [];
 
+        # Percorre o tabuleiro:
         for lin in range(len(self.board.matrix)):
             for col in range(len(self.board.matrix[lin])):
                 
