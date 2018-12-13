@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Projeto e Analise de Algoritmos (PAA)
 # 2o sem/2018 - IFMG - Campus Formiga
 # Pedro Henrique Oliveira Veloso (0002346)
@@ -73,7 +76,10 @@ class Game():
             # Checa se o jogo chegou ao fim (ambos os jogadores passaram 2x):
             gameover = self.isGameOver();
             if(gameover):
-                print("Fim do jogo.");
+                self.showBoard();
+                print("\n\tFim do jogo.\n");
+                print("Jogador " + str(self.player1) + ". Rack: " + str(self.player1.showHand()));
+                print("Jogador " + str(self.player2) + ". Rack: " + str(self.player2.showHand()) + "\n");
                 return;
 
     def fillHand(self, player):
@@ -186,10 +192,6 @@ class Game():
             # Um jogador ficar sem letras, ou os dois jogadores passarem duas vezes:
             if((self.player1.handSize() == 0) or (self.player2.handSize() == 0) or
               ((self.player1.nPass >= 2) and (self.player2.nPass >= 2))):
-                return True;
-
-        # Se houverem 6 turnos sem jogadas:
-        elif((self.player1.nPass >= 6) and (self.player2.nPass >= 6)):
                 return True;
 
         return False;

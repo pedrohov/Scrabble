@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Projeto e Analise de Algoritmos (PAA)
 # 2o sem/2018 - IFMG - Campus Formiga
 # Pedro Henrique Oliveira Veloso (0002346)

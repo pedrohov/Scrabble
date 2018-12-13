@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Projeto e Analise de Algoritmos (PAA)
 # 2o sem/2018 - IFMG - Campus Formiga
 # Pedro Henrique Oliveira Veloso (0002346)
@@ -43,8 +46,6 @@ class Player():
 
         # Faz a jogada se for valida:
         if(move is not None):
-            print("Jogada: ", end='');
-            print(move);
             self.board.insertWord(move, self);
             self.addWord(move);
             self.nPass = 0;

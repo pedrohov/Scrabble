@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Projeto e Analise de Algoritmos (PAA)
 # 2o sem/2018 - IFMG - Campus Formiga
 # Pedro Henrique Oliveira Veloso (0002346)
@@ -74,13 +77,16 @@ class PlayerIA(Player):
                 # Demais pedras:
                 if(self.hand[l].quantity > 0):
                     self.hand[l].quantity -= 1;
+                    self.placedNew = True;
                     newRoot = root.edges[l];
                     self.leftPart(word + l, newRoot, limit - 1, square);
                     self.hand[l].quantity += 1;
+                    self.placedNew = False;
 
                 # Trata pedras em branco na mao:
                 elif(self.hand['#'].quantity > 0):
                     self.hand['#'].quantity -= 1;
+                    self.placedNew = True;
                     newRoot = root.edges[l];
                     
                     # Adiciona a peca em branco a lista:
@@ -91,6 +97,7 @@ class PlayerIA(Player):
                     # Remove a pedra em branco da lista:
                     self.brancos.pop();
                     self.hand['#'].quantity += 1;
+                    self.placedNew = False;
 
         return;
 
